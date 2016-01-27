@@ -199,6 +199,7 @@ class Dockerfile:
 		self.image_source = None
 		self.image_version = "latest"
 		self.image_tag = None
+		self.image_user = 'root'
 
 		self.image_auto_upgrade = True
 
@@ -214,7 +215,7 @@ class Dockerfile:
 		if 'version' in options: self.image_version = options['version']
 		if 'cmd' in options: self.cmd = options['cmd']
 		if 'upgrade' in options: self.auto_upgrade = options['upgrade']
-
+		if 'user' in options: self.image_user = options['user']
 
 
 	def add_content( self, data_class ):
@@ -228,6 +229,9 @@ class Dockerfile:
 	def add_cmd( self, cmd ):
 		self.cmd = cmd
 
+	def add_user( self, user = 'root' ):
+		self.image_user = user
+
 	def add_tag( self, tag ):
 		self.image_tag = tag
 
@@ -239,6 +243,7 @@ class Dockerfile:
 
 		res.append( "FROM %(from)s:%(version)s" % {'from': self.image_source, 'version': self.image_version } )
 		res.append( "MAINTAINER %(maint)s" % {'maint': self.maintainer } )
+		res.append( "USER %(user)s" % {'user': self.image_user } )
 
 
 		for cnt in self.content:
@@ -292,7 +297,7 @@ class Dockerfile:
 		if 'name' in config: df.add_name( config['name'] )
 		if 'tag' in config:  df.add_tag( config['tag'] )
 		if 'cmd' in config:  df.add_cmd( config['cmd'] )
-
+		if 'user' in config: df.add_user( config['user'] ) 
 
 		curr_time_dt = datetime.utcnow().strftime('%s')
 		curr_time_str = datetime.utcnow()

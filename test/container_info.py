@@ -56,6 +56,17 @@ Image:
   'Size': 0,
   'VirtualSize': 196641664}
 
+{'Created': 1453923510,
+  'Id': '166fbc6794bc86401e97511f9ddb5f3ce7e6edf4551efc4fc53681db5c248f55',
+  'Labels': {'build-date': '2015-12-23',
+             'license': 'GPLv2',
+             'name': 'CentOS Base Image',
+             'vendor': 'CentOS'},
+  'ParentId': 'eac8ecd63574efaa0ce4223d86cefb71504276ddf76e6b36d01a459e09e48d9e',
+  'RepoDigests': [],
+  'RepoTags': ['peitur/dtestnginx:latest'],
+  'Size': 0,
+  'VirtualSize': 471566943},
 
 
 
@@ -76,7 +87,7 @@ Image:
 '''
 
 tls_config = docker.tls.TLSConfig( client_cert=('/vagrant/Docker/certs/cert.pem', '/vagrant/Docker/certs/key.pem'), verify=False )
-cli = docker.Client( base_url='https://192.168.99.100:2376', tls=tls_config )
+cli = docker.Client( base_url='https://192.168.99.101:2376', tls=tls_config )
 
 try:
 
@@ -120,21 +131,20 @@ try:
 	for ev in cli.events( decode=True ):
 
 #		pprint( ev )
-
 		if ev['status'] == 'create':
 			print("Reg: %(cont)s" % { 'cont': ev['id'] } )
 			containers[ ev['id'] ] = ev
+
 
 		if ev['status'] == 'die':
 			start_time = containers[ ev['id'] ]['time']
 			stop_time = ev['time']
 
 			if ( stop_time - start_time ) < 10:
-				print("WARN: Short runtime!! Suspected crash with container %(cont)s %(img)s" % {'cont': ev['id'], 'img': ev['from'] } )
+				print("WARN: Short runtime ( %(delta)s seconds)!! Suspected crash with container %(cont)s %(img)s" % { 'delta': stop_time - start_time ,'cont': ev['id'], 'img': ev['from'] } )
 				pprint( ev )
 
 			if ev['id'] in containers: del containers[ ev['id'] ]
-
 
 		pprint( containers )
 	print("========================================")
