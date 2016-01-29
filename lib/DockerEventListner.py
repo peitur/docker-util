@@ -1,39 +1,52 @@
 
-import sys, os, json, re
+import sys, os, json, re, time
 from pprint import pprint
 sys.path.append( "../lib" )
 
 #from docker import Client, tls, utils
 import docker
 import threading, queue
-import time
+
 from io import BytesIO
 
 
 
 
-
+## When a died container is detected, automatically remote the container.
+## 1. check exit status of container, if error then  extract logs and store
+## 2. remove the container.
 class DockerEventThread( threading.Thread ):
 
 	def __init__( self, *args, **kwargs ):
 		threading.Thread.__init__(self)
+		self.__client__ = None
 		self.__run__ = True
+		self.__monitor__ = []
 
-		val = args[0]
+		if 'client' in kwargs: 
+			self.__client__ = kwargs['client']
+		elif 'docker' in kwargs:
 
-		self.__val__ = val
+			tls_config = None
+			if 'tls' in kwargs:
+				tls_config = kwargs['tls']
 
-		print("Started thread ...")
+			try:
+				self.__client__ = docker.Client(base_url= kwargs['docker'] , tls=tls_config )
+			except Exception as error:
+				raise error
 
 
 	def run( self ):
-		while( self.__run__ ):
-			print( "tick %(x)s" % { 'x': self.__val__ } )
-			time.sleep(1)
+		if not self.__client__: 
+			raise RuntimeError( "ERROR: Client not initialized")
 
+		for evnt in self.__client__.events( decode=True ):
 
-	def register( self, val ):
-		self.__val__ = val
+			if not self.__run__: break
+
+			pprint( evnt )
+
 
 	def stop( self ):
 		self.__run__ = False
@@ -43,21 +56,24 @@ class DockerEventListner( object ):
 	__instance = None
 
 	def __new__( self, *args, **kwargs ):
-		if not self.__instance:
+		if not DockerEventListner.__instance:
 			print("Started singleton...")
-			self.__instance = super( DockerEventListner, self ).__new__( self )
+			DockerEventListner.__instance = super( DockerEventListner, self ).__new__( self )
         
 			DockerEventListner.__instance.__thread__ = DockerEventThread( *args, **kwargs )
 			DockerEventListner.__instance.__thread__.start()
 			
-		return self.__instance
+		return DockerEventListner.__instance
 
-	def register( self, val ):
-		try:
-			DockerEventListner.__instance.__thread__.register( val )
-		except Exception as error:
-			pprint( error )
+	def instance( *args, **kwargs ):
+		if not DockerEventListner.__instance:
+			 DockerEventListner.__instance = DockerEventListner( *args, **kwargs )
 
+		return DockerEventListner.__instance
+
+
+	def register_container( self, id ):
+		pass
 
 	def join( self ):
 		DockerEventListner.__instance.__thread__.join()
@@ -68,28 +84,28 @@ class DockerEventListner( object ):
 		except Exception as error:
 			pprint( error )
 
+
+
+
+
+
+
 if __name__ == "__main__":
-	x1 = DockerEventListner( "1" )
-	x2 = DockerEventListner( "2" )
-	x3 = DockerEventListner( "3" )
+
+	tls_config = docker.tls.TLSConfig( client_cert=('/vagrant/Docker/certs/cert.pem', '/vagrant/Docker/certs/key.pem'), verify=False )
+	cli = docker.Client(base_url='https://192.168.99.100:2376', tls=tls_config)
+
+
+	x1 = DockerEventListner.instance( client=cli )
 
 	print("wating...")
-	time.sleep(5)
-	x1.register( "a" )
-
-	time.sleep(1)
-	x2.register( "b" )
-
-	time.sleep(1)
-	x3.register( "c" )
-
-	time.sleep(2)
+	
+	try:
+		time.sleep( 100 )
+	except Exception as error:
+		pprint( error )
 
 	print("done")
 	x1.stop()
-	x2.stop()
-	x3.stop()
 
 	x1.join()
-	x2.join()
-	x3.join()
