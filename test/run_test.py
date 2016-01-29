@@ -8,7 +8,7 @@ import docker
 from io import BytesIO
 
 #### Internal libs
-import Dockerfile
+import Dockerfile, DockerEventListner
 
 debug = False
 auto_build = False
@@ -212,7 +212,7 @@ def build_image( cli, config ):
 tls_config = docker.tls.TLSConfig( client_cert=('/vagrant/Docker/certs/cert.pem', '/vagrant/Docker/certs/key.pem'), verify=False )
 cli = docker.Client(base_url='https://192.168.99.100:2376', tls=tls_config)
 
-
+event = DockerEventListner( client=cli )
 
 
 hostdep = {}
