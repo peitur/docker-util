@@ -1,0 +1,18 @@
+{
+	"var":{
+		"test1":"11111111111111",
+		"test2":"22222222222222",
+		"test3":"33333333333333",
+		"test4":"44444444444444",
+		"test5":"55555555555555"
+	},
+	"data":[
+		"wjefnwkejfnwekjfnwekjfn",
+		"fkjwenfkwjenf%%test1%%kjwenfkwn",
+		"%%test2",
+		"wjefwkejfn%%test2%%ekjrgnejgn",
+		"%%test3%%kjwenfkwjenfk",
+		"wfenwkjefnkwjenf%%test4%%",
+		"efwkjefn%%test1%%kjrnekjrng%%test2%%erkjgne"
+	]
+}
