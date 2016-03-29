@@ -7,6 +7,14 @@ from datetime import datetime, date, time
 
 
 PKGMGR_MAP = {
+	'alphine':{
+		'os':['alphine'],
+		'yes':"",
+		'cmd':{
+			'install':"apk install",
+			'upgrade':"pkg update && apk upgrade"
+		}
+	},
 	'apt-get':{
 		'os':['ubuntu','debian'],
 		'yes':"-y",
