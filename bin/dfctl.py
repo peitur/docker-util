@@ -7,6 +7,32 @@ from pprint import pprint
 
 import Dockerfile
 
+
+
+
+##############################################################
+DEFAULT_OUTPUT="Dockerfile"
+HELP_INFO={
+	"generate":{
+		"description":"Generate a Dockerfile",
+		"options":[	
+			{ "params":["h","help"], "default":None, "description":"Help" },
+			{ "params":["d","debug"], "default":None, "description":"debug" },
+			{ "params":["t","test"], "default":None, "description":"test" },
+			{ "params":["i","in"], "default":None, "description":"input file" },
+			{ "params":["o","out"], "default":DEFAULT_OUTPUT, "description":"output file" }
+	]},
+	"run":{
+		"description":"Generate a docker images",
+		"options":[	
+			{ "params":["h","help"], "default":None, "description":"Help" },
+			{ "params":["d","debug"], "default":None, "description":"debug" },
+			{ "params":["t","test"], "default":None, "description":"test" },
+			{ "params":["i","in"], "default":None, "description":"input file" }
+	]},	
+}
+
+
 ##############################################################
 def read_json( filename, **options ):
 	'''
@@ -112,11 +138,18 @@ def generate_dockerfile( json_file, **options ):
 	return dfcnt_list
 
 def print_help( **options ):
-	print("HELP")
-	pass
 
+	print("Usage : ")
+	print("This tool generates Dockerfiles from a simple json file and can also build the image in one go.")
 
+	for subcmd in sorted( HELP_INFO ):
+		part = HELP_INFO[subcmd]
 
+		print("\n\t%(cmd)-32s%(descr)-64s" % {'cmd': subcmd, 'descr':part['description'] } )
+		for opt in part['options']:
+			sopt = "-"+opt['params'][0]
+			lopt = "--"+opt['params'][1]
+			print("\t\t%(sopt)2s %(lopt)-20s %(descr)-32s" % {'sopt':sopt, 'lopt': lopt, 'descr': opt['description'] } )
 
 #################################
 if __name__ == "__main__":
@@ -147,11 +180,11 @@ if __name__ == "__main__":
 		elif o in ["-f","--file"]: options['jsonfile'] = a
 		elif o in ["-o","--output"]: options['output'] = a
 
-	pprint( options )
 
 	try:
-
-		if options['command'] == 'generate':
+		if options['command'] == 'help':
+			print_help( **options )
+		elif options['command'] == 'generate':
 			if not 'jsonfile' in options:
 				print( "Missing josn input file")
 				print_help( **options )	
