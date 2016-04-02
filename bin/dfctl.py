@@ -3,6 +3,9 @@
 import sys,os,re,getopt
 import json
 
+from docker import Client, tls
+from io import BytesIO
+
 from pprint import pprint
 
 import Dockerfile
@@ -53,41 +56,46 @@ def read_json( filename, **options ):
 	try:
 
 		for line in open( filename, "r"):
-			data.append( line.lstrip() )
+			data.append( line.rstrip().lstrip() )
 
 	except Exception as error:
 		pprint(error)
 
-	if debug: print("DEBUG: Read %(ln)s lines from %(fn)s" % {'ln': len( data ), 'fn':filename } )
+	if debug: print("DEBUG: Read %(ln)s lines from %(fn)s" % {'ln': len( data ), 'fn': filename } )
+	if debug:
+		pprint( data )
 
 	return json.loads( "\n".join( data ) )
 
 
-def store_dockerfile( filename, **options ):
+def store_dockerfile( filename, data, **options ):
 
 
 	if 'debug' in options and options['debug'] in [True, False]: debug = options['debug']
 	if 'test' in options and options['test'] in [True, False]: test = options['test']
 
+	fd = open( filename, "w" )
+	fd.write( data )
+	fd.close()
 
 	return True
 
-def build_image( dfcnt_list, **options ):
+def build_image( df, **options ):
 
 	debug = False
 	test = False
 
-	input_data = dfcnt_list
-	outputfile = None
+	input_data = df
 
 	if 'debug' in options and options['debug'] in [True, False]: debug = options['debug']
 	if 'test' in options and options['test'] in [True, False]: test = options['test']
 
-	cli = None
+	cli = Client( )
 
 	try:
 
-		response = [line for line in cli.build( fileobj=f, rm=True, tag=config['tag'] )]
+		f = BytesIO( df.as_string().encode('utf-8'))
+		response = [line for line in cli.build( fileobj=f, rm=True, tag=df.get_tag() )]
 
 		if debug:
 			print("=========================================") 
@@ -130,16 +138,11 @@ def generate_dockerfile( json_file, **options ):
 
 	if 'output' in options: outputfile = options['output']
 
-	dfcnt_list = Dockerfile.Dockerfile.build_from_config( read_json( json_file, **options ), **options )
-
-	if not outputfile:
-		print( "\n".join( dfcnt_list) ) 
-
-	return dfcnt_list
+	return Dockerfile.Dockerfile.build_from_config( read_json( json_file, **options ), **options )
 
 def print_help( **options ):
 
-	print("Usage : ")
+	print("Usage : <subcommands> [options]")
 	print("This tool generates Dockerfiles from a simple json file and can also build the image in one go.")
 
 	for subcmd in sorted( HELP_INFO ):
@@ -151,16 +154,23 @@ def print_help( **options ):
 			lopt = "--"+opt['params'][1]
 			print("\t\t%(sopt)2s %(lopt)-20s %(descr)-32s" % {'sopt':sopt, 'lopt': lopt, 'descr': opt['description'] } )
 
+
+
 #################################
 if __name__ == "__main__":
 
-	options = {}
-	options['debug'] = False
-	options['test'] = False
 
+	debug = False
+	test = False
+
+	options = {}
 	options['script'] = sys.argv.pop(0)
 	options['command'] = None
-	
+
+	options['output'] = DEFAULT_OUTPUT
+	options['storefile'] = None
+	options['print'] = False
+
 	if len( sys.argv ) > 0:
 		options['command'] = sys.argv.pop(0)
 	else:
@@ -168,32 +178,53 @@ if __name__ == "__main__":
 		sys.exit(-1)
 
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "hdtf:o:", ["help", "debug","test","file=", "output="])
+		opts, args = getopt.getopt(sys.argv, "phdti:o:", ["print","help", "debug","test","in=", "out=","output="])
 	except getopt.GetoptError as err:
 		print(err) # will print something like "option -a not recognized"
 		print_help( **options )
 		sys.exit(2)
 
 	for o, a in opts:
-		if o in ["-d","--debug"]: options['debug'] = True
-		elif o in ["-t","--test"]: options['test'] = True
-		elif o in ["-f","--file"]: options['jsonfile'] = a
-		elif o in ["-o","--output"]: options['output'] = a
+		if o in ["-d","--debug"]: debug = True
+		elif o in ["-t","--test"]: test = True
+		elif o in ["-p","--print"]: test = True
+		elif o in ["-i","--in"]: options['jsonfile'] = a
+		elif o in ["-o","--out"]: options['output'] = a
+
+
+	options['debug'] = debug
+	options['test'] = test
 
 
 	try:
+
+		if debug: pprint( options )
+
 		if options['command'] == 'help':
 			print_help( **options )
+
 		elif options['command'] == 'generate':
+			
 			if not 'jsonfile' in options:
-				print( "Missing josn input file")
+				print( "Missing josn input file input")
 				print_help( **options )	
+
 			else:
-				generate_dockerfile( options['jsonfile'], **options )
+
+				df = generate_dockerfile( options['jsonfile'], **options )
+
+				if options['print'] :
+					print( "\n".join( df.as_list() ) ) 
+
+				if not options['test']:
+					store_dockerfile( options['output'], "\n".join( df.as_list() ) , **options )
 
 		elif options['command'] == 'build':
-			pass
-	#		build_image( generate_dockerfile( options['jsonfile'], options ), options )	
+
+			df = generate_dockerfile( options['jsonfile'], **options )
+
+			build_image( df, **options )	
+
 		else:
 			print_help( **options )
 			sys.exit(2)

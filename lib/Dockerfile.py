@@ -228,6 +228,9 @@ class Dockerfile:
 		if 'user' in options: self.image_user = options['user']
 
 
+	def get_tag( self ): return self.image_tag
+	def get_name( self ): return self.image_name
+
 	def add_content( self, data_class ):
 		self.content.append( data_class )
 
@@ -295,7 +298,7 @@ class Dockerfile:
 
 		return res
 
-	def build_from_config( config ):
+	def build_from_config( config, **options ):
 
 		cmd=["/bin/sh"]
 		
