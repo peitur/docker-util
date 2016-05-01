@@ -7,6 +7,14 @@ from datetime import datetime, date, time
 
 
 PKGMGR_MAP = {
+	'alphine':{
+		'os':['alphine'],
+		'yes':"",
+		'cmd':{
+			'install':"apk install",
+			'upgrade':"pkg update && apk upgrade"
+		}
+	},
 	'apt-get':{
 		'os':['ubuntu','debian','hypriot/rpi-.*'],
 		'yes':"-y",
@@ -197,6 +205,7 @@ class Dockerfile:
 
 		self.maintainer = "None"
 		self.image_source = None
+		self.image_base = None
 		self.image_version = "latest"
 		self.image_tag = None
 		self.image_user = 'root'
@@ -211,12 +220,16 @@ class Dockerfile:
 		if 'name' in options: self.image_name = options['name']
 		if 'maintainer' in options: self.maintainer = options['maintainer']
 		if 'tag' in options: self.image_tag = options['tag']
+		if 'base' in options: self.image_base = options['base']		
 		if 'source' in options: self.image_source = options['source']
 		if 'version' in options: self.image_version = options['version']
 		if 'cmd' in options: self.cmd = options['cmd']
 		if 'upgrade' in options: self.auto_upgrade = options['upgrade']
 		if 'user' in options: self.image_user = options['user']
 
+
+	def get_tag( self ): return self.image_tag
+	def get_name( self ): return self.image_name
 
 	def add_content( self, data_class ):
 		self.content.append( data_class )
@@ -273,27 +286,28 @@ class Dockerfile:
 		return self.image_auto_upgrade
 
 
-	def supported_pkgmgr( self, insource = None ):
+	def supported_pkgmgr( self, inbase = None ):
 
-		source = self.image_source
-		if insource: soruce = insource
+		base = self.image_base
+		if inbase: base = inbase
 
 		res = None
 		for k in PKGMGR_MAP:
-			if source in PKGMGR_MAP[k]["os"]:
+			if base in PKGMGR_MAP[k]["os"]:
 				return k
 
 		return res
 
-	def build_from_config( config ):
+	def build_from_config( config, **options ):
 
 		cmd=["/bin/sh"]
 		
 		if 'maintainer' not in config: raise RuntimeError("No maintainer")
+		if 'base' not in config: raise RuntimeError("Missing container base")
 		if 'source' not in config: raise RuntimeError("Missing container source")
 
 
-		df = Dockerfile( maintainer=config['maintainer'], source=config['source'] )
+		df = Dockerfile( maintainer=config['maintainer'], source=config['source'], base=config['base'] )
 		if 'name' in config: df.add_name( config['name'] )
 		if 'tag' in config:  df.add_tag( config['tag'] )
 		if 'cmd' in config:  df.add_cmd( config['cmd'] )

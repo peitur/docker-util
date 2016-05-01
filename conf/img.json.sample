@@ -1,0 +1,24 @@
+{
+	"product":"dtestnginx",
+	"docker":"https://192.168.99.100:2376",
+	"maintainer":"peitur@gmail.com",
+	"base":"redhat",
+	"source":"centos",
+	"version":"latest",
+	"name":"testing",
+	"tag":"peitur/dtestnginx",
+	"upgrade":"True",
+	"tasks":[
+		{
+			"install":["epel-release"]
+		},
+		{
+			"install":["nginx"]
+		},
+		{
+			"volume":"/tmp/test/conf"
+		}
+	],
+	"ports":["2121","8080"],
+	"cmd":"/bin/sh"
+}
