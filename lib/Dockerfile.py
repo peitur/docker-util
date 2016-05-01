@@ -8,7 +8,7 @@ from datetime import datetime, date, time
 
 PKGMGR_MAP = {
 	'apt-get':{
-		'os':['ubuntu','debian'],
+		'os':['ubuntu','debian','hypriot/rpi-.*'],
 		'yes':"-y",
 		'cmd': {
 			'install':'apt-get install',
