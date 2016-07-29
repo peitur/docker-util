@@ -15,41 +15,41 @@ SUPPORTED_CACHE_TYPES = ['image','container','network','volume']
 class DockerObjectCache:
 
 	def __init__(self), client = None ) :
-		self.__client__ = client
+		self._client = client
 
-		self.__dirty__ = True
-		self.__content__ = None
+		self._dirty = True
+		self._content = None
 
 
 	def refresh( self ):
-		self.__dirty__ = True
-		
-		return self.__dirty__
+		self._dirty = True
+
+		return self._dirty
 
 	def is_dirty( self ):
-		return self.__dirty__
+		return self._dirty
 
 
 
 class DockerImageCache( DockerObjectCache ):
-	def __init__(self, client = None ):	
-		DockerObjectCache.__init__( self )
+	def __init__(self, client = None ):
+		super().__init__( self )
 
 class DockerContainerCache( DockerObjectCache ):
-	def __init__(self, client = None):	
-		DockerObjectCache.__init__( self )
+	def __init__(self, client = None):
+		super().__init__( self )
 
 class DockerNetworkCache( DockerObjectCache ):
-	def __init__(self, client = None):	
-		DockerObjectCache.__init__( self )
+	def __init__(self, client = None):
+		super().__init__( self )
 
 class DockerResourceCache( DockerObjectCache ):
-	def __init__(self, client = None):	
-		DockerObjectCache.__init__( self )
+	def __init__(self, client = None):
+		super().__init__( self )
 
 class DockerVolumeCache( DockerObjectCache ):
-	def __init__(self, client = None):	
-		DockerObjectCache.__init__( self )
+	def __init__(self, client = None):
+		super().__init__( self )
 
 
 
@@ -101,9 +101,9 @@ class DockerCache:
 		if what == 'all':
 			what = SUPPORTED_CACHE_TYPES
 
-		elif type( what ) is str: 
+		elif type( what ) is str:
 			what = [what]
-		
+
 
 
 class DockerCacheSingelton( object ):
@@ -113,7 +113,7 @@ class DockerCacheSingelton( object ):
 		if not self.__instance:
 			print("Started singleton...")
 			self.__instance = super( DockerCache, self ).__new__( self )
-        
+
 		return self.__instance
 
 
