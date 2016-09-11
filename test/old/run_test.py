@@ -1,5 +1,5 @@
 
-import sys, os, json, re
+import sys, os, json, re, time 
 from pprint import pprint
 sys.path.append( "../lib" )
 
@@ -10,8 +10,8 @@ from io import BytesIO
 #### Internal libs
 import Dockerfile, DockerEventListner
 
-debug = False
-auto_build = False
+debug = True
+auto_build = True
 
 CONFIG_HOST_0 = {
 	'product':"dtestnginx",
@@ -108,9 +108,9 @@ CONFIG_HOST_3 = {
 
 HOSTS = {
 	'dtestnginx': { 'min':3, 'max':2, 'config':CONFIG_HOST_0 },
-#	'dtestapp': { 'min':2, 'max':5, 'config':CONFIG_HOST_1 },
-#	'dtestweb': { 'min':2, 'max':2,'depends': ['dtestapp'], 'config':CONFIG_HOST_2 },
-#	"dtestaccess": { 'min':1, 'max':1, 'config':CONFIG_HOST_3 }
+	'dtestapp': { 'min':2, 'max':5, 'config':CONFIG_HOST_1 },
+	'dtestweb': { 'min':2, 'max':2,'depends': ['dtestapp'], 'config':CONFIG_HOST_2 },
+	"dtestaccess": { 'min':1, 'max':1, 'config':CONFIG_HOST_3 }
 }
 
 
@@ -210,10 +210,11 @@ def build_image( cli, config ):
 
 #######################################################
 tls_config = docker.tls.TLSConfig( client_cert=('/vagrant/Docker/certs/cert.pem', '/vagrant/Docker/certs/key.pem'), verify=False )
-cli = docker.Client(base_url='https://192.168.99.100:2376', tls=tls_config)
+cli = docker.Client(base_url='https://192.168.99.101:2376', tls=tls_config)
 
-event = DockerEventListner( client=cli )
+# event = DockerEventListner.DockerEventListner( client=cli, debug=debug )
 
+time.sleep(1)
 
 hostdep = {}
 for cf in HOSTS:
@@ -246,5 +247,5 @@ for i in HOSTS:
 		if start_container( cli, img_config['config'] ) == False:
 			print("ERROR: Starting %(tag)s failed"  % {'tag': img_tag } )
 
-
+		time.sleep(1)
 

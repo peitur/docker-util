@@ -1,4 +1,4 @@
-#!/usr/bin/python3 
+#!/usr/bin/python3
 
 import sys,os,re,getopt
 import json
@@ -11,6 +11,22 @@ from pprint import pprint
 import Dockerfile
 
 
+END = '\033[0m'
+BLACK = '\033[30m'
+RED = '\033[31m'
+GREEN = '\033[32m'
+ORANGE = '\033[33m'
+BLUE = '\033[34m'
+PURPLE = '\033[35m'
+CYAN = '\033[36m'
+YELLOW = '\033[93m'
+PINK = '\033[95m'
+DARKGRAY = '\033[90m'
+LIGHTGRAY = '\033[37m'
+LIGHTRED = '\033[91m'
+LIGHTGREEN = '\033[92m'
+LIGHTBLUE = '\033[94m'
+LIGHTCYAN = '\033[96m'
 
 
 ##############################################################
@@ -18,7 +34,7 @@ DEFAULT_OUTPUT="Dockerfile"
 HELP_INFO={
 	"generate":{
 		"description":"Generate a Dockerfile",
-		"options":[	
+		"options":[
 			{ "params":["h","help"], "default":None, "description":"Help" },
 			{ "params":["d","debug"], "default":None, "description":"debug" },
 			{ "params":["t","test"], "default":None, "description":"test" },
@@ -27,12 +43,12 @@ HELP_INFO={
 	]},
 	"run":{
 		"description":"Generate a docker images",
-		"options":[	
+		"options":[
 			{ "params":["h","help"], "default":None, "description":"Help" },
 			{ "params":["d","debug"], "default":None, "description":"debug" },
 			{ "params":["t","test"], "default":None, "description":"test" },
 			{ "params":["i","in"], "default":None, "description":"input file" }
-	]},	
+	]},
 }
 
 
@@ -41,7 +57,7 @@ def read_json( filename, **options ):
 	'''
 		Read a json file
 		filename: filename
-		options: 
+		options:
 			- debug : toggle debugging
 
 		Returns: term
@@ -98,7 +114,7 @@ def build_image( df, **options ):
 		response = [line for line in cli.build( fileobj=f, rm=True, tag=df.get_tag() )]
 
 		if debug:
-			print("=========================================") 
+			print("=========================================")
 			pprint( response )
 			print("=========================================")
 
@@ -204,17 +220,17 @@ if __name__ == "__main__":
 			print_help( **options )
 
 		elif options['command'] == 'generate':
-			
+
 			if not 'jsonfile' in options:
 				print( "Missing josn input file input")
-				print_help( **options )	
+				print_help( **options )
 
 			else:
 
 				df = generate_dockerfile( options['jsonfile'], **options )
 
 				if options['print'] :
-					print( "\n".join( df.as_list() ) ) 
+					print( "\n".join( df.as_list() ) )
 
 				if not options['test']:
 					store_dockerfile( options['output'], "\n".join( df.as_list() ) , **options )
@@ -223,7 +239,7 @@ if __name__ == "__main__":
 
 			df = generate_dockerfile( options['jsonfile'], **options )
 
-			build_image( df, **options )	
+			build_image( df, **options )
 
 		else:
 			print_help( **options )
@@ -233,5 +249,3 @@ if __name__ == "__main__":
 		pprint(error)
 		print_help( **options )
 		sys.exit(2)
-
-

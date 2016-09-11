@@ -87,7 +87,7 @@ Image:
 '''
 
 tls_config = docker.tls.TLSConfig( client_cert=('/vagrant/Docker/certs/cert.pem', '/vagrant/Docker/certs/key.pem'), verify=False )
-cli = docker.Client( base_url='https://192.168.99.101:2376', tls=tls_config )
+cli = docker.Client( base_url='https://192.168.99.100:2376', tls=tls_config )
 
 try:
 
