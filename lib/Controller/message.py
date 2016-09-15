@@ -145,6 +145,8 @@ class RequestMessage( Message ):
     def __init__( self, mid, mtype, mto, mfrom, mdata, **options ):
         '''
         '''
+        super().__init__( self, mid, mtype, mto, mfrom, mdata, options )
+
         self.__debug = False
         if 'debug' in options:
             self.__debug = True
@@ -157,6 +159,8 @@ class ReplyMessage( Message ):
     def __init__( self, mid, mtype, mto, mfrom, mdata, **options ):
         '''
         '''
+        super().__init__( self, mid, mtype, mto, mfrom, mdata, options )
+
         self.__debug = False
         if 'debug' in options:
             self.__debug = True
@@ -169,6 +173,8 @@ class InfoMessage( Message ):
     def __init__( self, mid, mtype, mto, mfrom, mdata, **options ):
         '''
         '''
+        super().__init__( self, mid, mtype, mto, mfrom, mdata, options )
+
         self.__debug = False
         if 'debug' in options:
             self.__debug = True
@@ -182,6 +188,8 @@ class UpdateMessage( Message ):
     def __init__( self, mid, mtype, mto, mfrom, mdata, **options ):
         '''
         '''
+        super().__init__( self, mid, mtype, mto, mfrom, mdata, options )
+
         self.__debug = False
         if 'debug' in options:
             self.__debug = True
