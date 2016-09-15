@@ -152,7 +152,11 @@ class Message:
         }
 
     def __str__( self ):
-        return "id:%(id)s;to:%(to)s;from:%(from)s;content:%(data)s" % { 'id': self.__message_id, 'to':self.__message_to, 'from':self.__message_from, 'data':self.__message_content }
+        return "id:%(id)s;type:%(type)s;to:%(to)s;from:%(from)s;content:%(data)s" % { 'id': self.__message_id,'type':self.__message_type, 'to':self.__message_to, 'from':self.__message_from, 'data':self.__message_content }
+
+    def __serialize__( self ):
+        return json.dumps( self.__dict__( ) )
+
 
 #################################################################################
 
@@ -215,10 +219,10 @@ class UpdateMessage( Message ):
 
 if __name__ == "__main__":
     from pprint import pprint
-    pprint( RequestMessage("1", "aaaa", "bbbb","cccccccc" ).__dict__() )
-    pprint( ReplyMessage("2", "aaaa", "bbbb","cccccccc" ).__dict__() )
-    pprint( InfoMessage("3", "aaaa", "bbbb","cccccccc" ).__dict__() )
-    pprint( UpdateMessage("4", "aaaa", "bbbb","cccccccc" ).__dict__() )
+    pprint( RequestMessage("1", "aaaa", "bbbb","cccccccc" ).__serialize__() )
+    pprint( ReplyMessage("2", "aaaa", "bbbb","cccccccc" ).__serialize__() )
+    pprint( InfoMessage("3", "aaaa", "bbbb","cccccccc" ).__serialize__() )
+    pprint( UpdateMessage("4", "aaaa", "bbbb","cccccccc" ).__serialize__() )
 
 
     pass
