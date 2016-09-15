@@ -9,7 +9,10 @@ class MessageId:
     def __init__( self, mid, **options ):
         '''
         '''
-        self.__message_id = mid
+        if type( mid ).__name__ == 'MessageId':
+            self.__message_id = mid.__str__()
+        else:
+            self.__message_id = mid
 
         self.__debug = False
         if 'debug' in options:
@@ -30,10 +33,14 @@ class MessageType:
         '''
         self.TYPES=['request','reply','info','update']
 
-        if mtype not in self.TYPES:
+        if type( mtype ).__name__ == 'MessageType':
+            self.__message_type = mtype.__str__()
+        else:
+            self.__message_type = mtype
+
+        if self.__message_type not in self.TYPES:
             raise AttributeError( "ERROR: Unsupported message type %s" % ( mtype ) )
 
-        self.__message_type = mtype
 
         self.__debug = False
         if 'debug' in options:
@@ -45,13 +52,19 @@ class MessageType:
     def __str__( self ):
         return self.__message_type.__str__()
 
+
+
 class MessageEndpoint:
     '''
     '''
     def __init__( self, epoint, **options ):
         '''
         '''
-        self.__message_endpoint = epoint
+
+        if type( epoint ).__name__ == 'MessageEndpoint':
+            self.__message_endpoint = epoint.__str__()
+        else:
+            self.__message_endpoint = epoint
 
         self.__debug = False
         if 'debug' in options:
@@ -68,10 +81,13 @@ class MessageEndpoint:
 class MessageData:
     '''
     '''
-    def __init__( self, data, **options ):
+    def __init__( self, mdata, **options ):
         '''
         '''
-        self.__message_content = mdata
+        if type( mdata ).__name__ == 'MessageData':
+            self.__message_content = mdata.__str__()
+        else:
+            self.__message_content = mdata
 
         self.__debug = False
         if 'debug' in options:
@@ -93,11 +109,12 @@ class Message:
         '''
         Constructor, new message container
         '''
-        self.__message_id = mid
-        self.__message_type = mtype
-        self.__message_to = mto
-        self.__message_from = mfrom
-        self.__message_content = mdata
+
+        self.__message_id = MessageId( mid )
+        self.__message_type = MessageType( mtype )
+        self.__message_to = MessageEndpoint( mto )
+        self.__message_from = MessageEndpoint( mfrom )
+        self.__message_content = MessageData( mdata )
 
         self.__debug = False
         if 'debug' in options:
@@ -142,10 +159,10 @@ class Message:
 class RequestMessage( Message ):
     '''
     '''
-    def __init__( self, mid, mtype, mto, mfrom, mdata, **options ):
+    def __init__( self, mid, mto, mfrom, mdata, **options ):
         '''
         '''
-        super().__init__( self, mid, mtype, mto, mfrom, mdata, options )
+        Message.__init__( self, mid, MessageType('request'), mto, mfrom, mdata, **options )
 
         self.__debug = False
         if 'debug' in options:
@@ -156,10 +173,10 @@ class RequestMessage( Message ):
 class ReplyMessage( Message ):
     '''
     '''
-    def __init__( self, mid, mtype, mto, mfrom, mdata, **options ):
+    def __init__( self, mid, mto, mfrom, mdata, **options ):
         '''
         '''
-        super().__init__( self, mid, mtype, mto, mfrom, mdata, options )
+        Message.__init__( self, mid, MessageType('reply'), mto, mfrom, mdata, **options )
 
         self.__debug = False
         if 'debug' in options:
@@ -170,10 +187,10 @@ class ReplyMessage( Message ):
 class InfoMessage( Message ):
     '''
     '''
-    def __init__( self, mid, mtype, mto, mfrom, mdata, **options ):
+    def __init__( self, mid, mto, mfrom, mdata, **options ):
         '''
         '''
-        super().__init__( self, mid, mtype, mto, mfrom, mdata, options )
+        Message.__init__( self, mid, MessageType('info'), mto, mfrom, mdata, **options )
 
         self.__debug = False
         if 'debug' in options:
@@ -185,10 +202,10 @@ class InfoMessage( Message ):
 class UpdateMessage( Message ):
     '''
     '''
-    def __init__( self, mid, mtype, mto, mfrom, mdata, **options ):
+    def __init__( self, mid, mto, mfrom, mdata, **options ):
         '''
         '''
-        super().__init__( self, mid, mtype, mto, mfrom, mdata, options )
+        Message.__init__( self, mid, MessageType('update'), mto, mfrom, mdata, **options )
 
         self.__debug = False
         if 'debug' in options:
@@ -197,4 +214,11 @@ class UpdateMessage( Message ):
 #################################################################################
 
 if __name__ == "__main__":
+    from pprint import pprint
+    pprint( RequestMessage("1", "aaaa", "bbbb","cccccccc" ).__dict__() )
+    pprint( ReplyMessage("2", "aaaa", "bbbb","cccccccc" ).__dict__() )
+    pprint( InfoMessage("3", "aaaa", "bbbb","cccccccc" ).__dict__() )
+    pprint( UpdateMessage("4", "aaaa", "bbbb","cccccccc" ).__dict__() )
+
+
     pass
