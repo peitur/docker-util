@@ -158,6 +158,12 @@ class Message:
         return json.dumps( self.__dict__( ) )
 
 
+
+
+
+
+
+
 #################################################################################
 
 class RequestMessage( Message ):
@@ -216,13 +222,49 @@ class UpdateMessage( Message ):
             self.__debug = True
 
 #################################################################################
+def encode_message( data, **options ):
+    '''
+    '''
+    if type( data ).__name__ == 'str': return data
+    elif type( data ).__name__ == 'dict': return data.__str__()
+    else: return data.__serialize__()
+
+
+def decode_message( data, **options ):
+    '''
+    '''
+    ## assuming json if indata is a string
+    xdata = None
+    if type( data ).__name__ == 'str':
+        xdata = json.loads( data )
+    elif type( data ).__name__ == 'dict':
+        xdata = data
+
+    if xdata['type'] in ( 'request' ):
+        return RequestMessage( xdata['id'],xdata['to'],xdata['from'],xdata['content'], **options )
+    elif xdata['type'] in ( 'reply' ):
+        return ReplyMessage( xdata['id'],xdata['to'],xdata['from'],xdata['content'], **options )
+    elif xdata['type'] in ( 'info' ):
+        return InfoMessage( xdata['id'],xdata['to'],xdata['from'],xdata['content'], **options )
+    elif xdata['type'] in ( 'update' ):
+        return UpdateMessage( xdata['id'],xdata['to'],xdata['from'],xdata['content'], **options )
+    else:
+        raise AttributeError("ERROR: Unsupported message type: '%s'" % ( xdata['type'] ) )
 
 if __name__ == "__main__":
+
+
+    # Todo: Redo this as unit tests in a propper implementation
     from pprint import pprint
+
     pprint( RequestMessage("1", "aaaa", "bbbb","cccccccc" ).__serialize__() )
     pprint( ReplyMessage("2", "aaaa", "bbbb","cccccccc" ).__serialize__() )
     pprint( InfoMessage("3", "aaaa", "bbbb","cccccccc" ).__serialize__() )
     pprint( UpdateMessage("4", "aaaa", "bbbb","cccccccc" ).__serialize__() )
 
+    pprint( decode_message( RequestMessage("1", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
+    pprint( decode_message( ReplyMessage("2", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
+    pprint( decode_message( InfoMessage("3", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
+    pprint( decode_message( UpdateMessage("4", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
 
     pass
