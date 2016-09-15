@@ -39,7 +39,7 @@ On_Red='\033[41m'         # Red
 On_Green='\033[42m'       # Green
 On_Yellow='\033[43m'      # Yellow
 
-PYTHONPATH="$PWD/../lib"
+PYTHONPATH="$PWD/lib:$PWD/../lib"
 
 PYTHON3=$(which python3)
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")

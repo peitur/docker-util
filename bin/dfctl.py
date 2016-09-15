@@ -10,24 +10,24 @@ from pprint import pprint
 
 import Dockerfile
 
-
-END = '\033[0m'
-BLACK = '\033[30m'
-RED = '\033[31m'
-GREEN = '\033[32m'
-ORANGE = '\033[33m'
-BLUE = '\033[34m'
-PURPLE = '\033[35m'
-CYAN = '\033[36m'
-YELLOW = '\033[93m'
-PINK = '\033[95m'
-DARKGRAY = '\033[90m'
-LIGHTGRAY = '\033[37m'
-LIGHTRED = '\033[91m'
-LIGHTGREEN = '\033[92m'
-LIGHTBLUE = '\033[94m'
-LIGHTCYAN = '\033[96m'
-
+COLORS={
+	"normal" : '\033[0m'
+	"black" : '\033[30m'
+	"red" : '\033[31m'
+	"green" : '\033[32m'
+ 	"organge" : '\033[33m'
+	"blue" :'\033[34m'
+	"purple" :'\033[35m'
+	"cyan" : '\033[36m'
+	"yellow" : '\033[93m'
+	"pink" : '\033[95m'
+	"darkgray" : '\033[90m'
+	"lightgray" : '\033[37m'
+	"lightred" : '\033[91m'
+	"lightgreen" : '\033[92m'
+	"lightbleu" : '\033[94m'
+	"lightcyan" : '\033[96m'
+}
 
 ##############################################################
 DEFAULT_OUTPUT="Dockerfile"
@@ -48,7 +48,7 @@ HELP_INFO={
 			{ "params":["d","debug"], "default":None, "description":"debug" },
 			{ "params":["t","test"], "default":None, "description":"test" },
 			{ "params":["i","in"], "default":None, "description":"input file" }
-	]},
+	]}
 }
 
 
