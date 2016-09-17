@@ -172,7 +172,7 @@ class RequestMessage( Message ):
     def __init__( self, mid, mto, mfrom, mdata, **options ):
         '''
         '''
-        Message.__init__( self, mid, MessageType('request'), mto, mfrom, mdata, **options )
+        super( RequestMessage, self ).__init__( mid, MessageType('request'), mto, mfrom, mdata, **options )
 
         self.__debug = False
         if 'debug' in options:
@@ -186,7 +186,7 @@ class ReplyMessage( Message ):
     def __init__( self, mid, mto, mfrom, mdata, **options ):
         '''
         '''
-        Message.__init__( self, mid, MessageType('reply'), mto, mfrom, mdata, **options )
+        super( ReplyMessage, self ).__init__( mid, MessageType('reply'), mto, mfrom, mdata, **options )
 
         self.__debug = False
         if 'debug' in options:
@@ -200,7 +200,7 @@ class InfoMessage( Message ):
     def __init__( self, mid, mto, mfrom, mdata, **options ):
         '''
         '''
-        Message.__init__( self, mid, MessageType('info'), mto, mfrom, mdata, **options )
+        super( InfoMessage, self ).__init__( mid, MessageType('info'), mto, mfrom, mdata, **options )
 
         self.__debug = False
         if 'debug' in options:
@@ -215,7 +215,7 @@ class UpdateMessage( Message ):
     def __init__( self, mid, mto, mfrom, mdata, **options ):
         '''
         '''
-        Message.__init__( self, mid, MessageType('update'), mto, mfrom, mdata, **options )
+        super( UpdateMessage, self ).__init__( mid, MessageType('update'), mto, mfrom, mdata, **options )
 
         self.__debug = False
         if 'debug' in options:
@@ -227,7 +227,7 @@ class AlarmMessage( Message ):
     def __init__( self, mid, mto, mfrom, mdata, **options ):
         '''
         '''
-        Message.__init__( self, mid, MessageType('alarm'), mto, mfrom, mdata, **options )
+        super( AlarmMessage, self ).__init__( mid, MessageType('alarm'), mto, mfrom, mdata, **options )
 
         self.__debug = False
         if 'debug' in options:
