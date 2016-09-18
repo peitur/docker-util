@@ -19,6 +19,8 @@ PROC_STATUS_ML = "status"
 DOCKERD="dockerd"
 
 MEMFILE = "meminfo"
+LOADFILE = "loadavg"
+CPUFILE = "cpuinfo"
 
 #########################################################################
 
@@ -130,7 +132,7 @@ class ProcessTreeInformation( Information ):
 
         return result
 
-        
+
     def __serialize__( self ):
         return json.dumps( self.__dict__() )
 
@@ -185,6 +187,43 @@ class MemoryInformation(Information):
 
     def __dict__( self ):
         return self.__memory_info
+
+
+
+class CpuInformation(Information):
+    '''
+        Speciffic local CPU information
+    '''
+    def __init__(self):
+        super( CpuInformation, self ).__init__()
+        pass
+
+    def __str__( self ):
+        pass
+
+    def __serialize__( self ):
+        pass
+
+    def __dict__( self ):
+        pass
+
+
+class SystemLoadInformation(Information):
+    '''
+        Speciffic local system load information
+    '''
+    def __init__(self):
+        super( SystemLoadInformation, self ).__init__()
+        pass
+
+    def __str__( self ):
+        pass
+
+    def __serialize__( self ):
+        pass
+
+    def __dict__( self ):
+        pass
 
 
 
