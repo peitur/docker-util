@@ -268,20 +268,20 @@ def decode_message( data, **options ):
 
 if __name__ == "__main__":
 
-
-    # Todo: Redo this as unit tests in a propper implementation
-    from pprint import pprint
-
-    pprint( RequestMessage("1", "aaaa", "bbbb","cccccccc" ).__serialize__() )
-    pprint( ReplyMessage("2", "aaaa", "bbbb","cccccccc" ).__serialize__() )
-    pprint( InfoMessage("3", "aaaa", "bbbb","cccccccc" ).__serialize__() )
-    pprint( UpdateMessage("4", "aaaa", "bbbb","cccccccc" ).__serialize__() )
-    pprint( AlarmMessage("5", "aaaa", "bbbb","cccccccc" ).__serialize__() )
-
-    pprint( decode_message( RequestMessage("1", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
-    pprint( decode_message( ReplyMessage("2", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
-    pprint( decode_message( InfoMessage("3", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
-    pprint( decode_message( UpdateMessage("4", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
-    pprint( decode_message( AlarmMessage("5", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
+    #
+    # # Todo: Redo this as unit tests in a propper implementation
+    # from pprint import pprint
+    #
+    # pprint( RequestMessage("1", "aaaa", "bbbb","cccccccc" ).__serialize__() )
+    # pprint( ReplyMessage("2", "aaaa", "bbbb","cccccccc" ).__serialize__() )
+    # pprint( InfoMessage("3", "aaaa", "bbbb","cccccccc" ).__serialize__() )
+    # pprint( UpdateMessage("4", "aaaa", "bbbb","cccccccc" ).__serialize__() )
+    # pprint( AlarmMessage("5", "aaaa", "bbbb","cccccccc" ).__serialize__() )
+    #
+    # pprint( decode_message( RequestMessage("1", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
+    # pprint( decode_message( ReplyMessage("2", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
+    # pprint( decode_message( InfoMessage("3", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
+    # pprint( decode_message( UpdateMessage("4", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
+    # pprint( decode_message( AlarmMessage("5", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
 
     pass

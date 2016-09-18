@@ -270,10 +270,15 @@ class SystemInformation(Information):
 
         self.__process_info = ProcessTreeInformation()
         self.__memory_info = MemoryInformation()
+        self.__systemload_info = SystemLoadInformation()
+        self.__cpu_info = CpuInformation()
+
         self.__docker_info = None
 
         self.__process_info.scan()
         self.__memory_info.load_data()
+        self.__systemload_info.load_data()
+        self.__cpu_info()
 
 
 
