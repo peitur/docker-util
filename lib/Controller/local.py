@@ -31,17 +31,20 @@ class Information:
     def __init__(self):
         pass
 
+    def load_data( self ):
+        raise NotImplementedError("ERROR: 'load_data' function is not implemented")
+
     def __str__( self ):
-        raise NotImplementedError("ERROR: function is not implemented")
+        raise NotImplementedError("ERROR: '__str__' function is not implemented")
 
     def __serialize__( self ):
-        raise NotImplementedError("ERROR: function is not implemented")
+        raise NotImplementedError("ERROR: '__serialize__' function is not implemented")
 
     def __dict__(self):
-        raise NotImplementedError("ERROR: function is not implemented")
+        raise NotImplementedError("ERROR: '__dict__' function is not implemented")
 
     def get_information( self ):
-        raise NotImplementedError("ERROR: function is not implemented")
+        raise NotImplementedError("ERROR: 'get_information' function is not implemented")
 
 
 
@@ -106,7 +109,7 @@ class ProcessTreeInformation( Information ):
         self.__process_list = {}
 
 
-    def scan( self ):
+    def load_data( self ):
         ps_rx = re.compile( r"^/proc/([0-9]+)$" )
         for x in Path("/proc").iterdir():
             m = ps_rx.match( x.__str__() )
@@ -190,22 +193,39 @@ class MemoryInformation(Information):
 
 
 
-class CpuInformation(Information):
+class CpuInformation( Information ):
     '''
         Speciffic local CPU information
     '''
     def __init__(self):
         super( CpuInformation, self ).__init__()
-        pass
+        self.__cpu_fields = ['processor','vendor_id','model name','cpu mzh','bogmips']
+        self.__cpu_data = []
+        self.__rotate = self.__cpu_fields[0]
+        self.__cpu_filename = "%(path)s/%(fn)s" % { 'path':PROC, 'fn': CPUFILE }
+
+    def load_data( self ):
+
+        data = {}
+        for line in open( self.__cpu_filename.__str__(), "r" ):
+        
+            larray = [ x.lstrip().rstrip() for x in re.split( r":", line ) ]
+            if larray[0].lower() in self.__cpu_fields:
+                data[ larray[0].lower() ] = larray[1]
+        
+            if self.__rotate == larray[0].lower() and self.__rotate in data:
+                self.__cpu_data.append( data )
+                data = {}
+
 
     def __str__( self ):
-        pass
+        pass        
 
     def __serialize__( self ):
-        pass
+        return json.dumps( self.__dict__() )
 
     def __dict__( self ):
-        pass
+        return self.__cpu_data
 
 
 class SystemLoadInformation(Information):
@@ -263,22 +283,52 @@ class DockerInformation(Information):
         pass
 
 
-class SystemInformation(Information):
+class SystemInformation( Information ):
 
-    def __init__(self):
+    def __init__(self, **options ):
+        
         super( ProcessInformation, self ).__init__()
 
-        self.__process_info = ProcessTreeInformation()
-        self.__memory_info = MemoryInformation()
-        self.__systemload_info = SystemLoadInformation()
-        self.__cpu_info = CpuInformation()
+        self.__cache_data = False  
+        self.__cache_dirty = False
 
-        self.__docker_info = None
 
-        self.__process_info.scan()
-        self.__memory_info.load_data()
-        self.__systemload_info.load_data()
-        self.__cpu_info()
+        if 'cached' in config:
+            self.__cache_data = True    
+            self.__cache_dirty = True
+
+        if self.__cache_data and self.__cache_dirty:
+            self.__process_info = ProcessTreeInformation()
+            self.__memory_info = MemoryInformation()
+            self.__systemload_info = SystemLoadInformation()
+            self.__cpu_info = CpuInformation()
+    
+            self.__docker_info = None
+    
+            self.__process_info.load_data()
+            self.__memory_info.load_data()
+            self.__systemload_info.load_data()
+            self.__cpu_info.load_data()
+
+            self.__cache_dirty = False
+
+
+    def get( self, what, **options ):
+        
+        formt = 'object'
+        if 'format' in options and options['format'] in ( "object","json","str", "string" ):
+            formt = options['format']
+        
+        if what in ("cpu"):
+            pass
+        elif what in ("process"):
+            pass
+        elif what in ("memory"):
+            pass
+        elif what in ("loadavg"):
+            pass
+        else:
+            raise AttributeError("ERROR: Type %s not supported" % ( what ) )
 
 
 
@@ -296,7 +346,7 @@ class SystemInformation(Information):
 #########################################################################
 if __name__ == "__main__":
     pti = ProcessTreeInformation()
-    if pti.scan() > 0:
+    if pti.load_data() > 0:
         pprint( pti.get_information() )
         pprint( pti.filter('name') )
 
@@ -306,3 +356,9 @@ if __name__ == "__main__":
 
     pprint( pti.__serialize__() )
     pprint( mi.__serialize__() )
+    
+    ci = CpuInformation( )
+    ci.load_data()
+    
+    pprint( ci.__serialize__() )
+    
