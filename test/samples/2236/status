@@ -1,0 +1,41 @@
+Name:	sudo
+State:	S (sleeping)
+Tgid:	4320
+Ngid:	0
+Pid:	2236
+PPid:	2235
+TracerPid:	0
+Uid:	0	0	0	0
+Gid:	1000	1000	1000	1000
+FDSize:	256
+Groups:	10 1000
+VmPeak:	  193420 kB
+VmSize:	  193416 kB
+VmLck:	       0 kB
+VmPin:	       0 kB
+VmHWM:	    2788 kB
+VmRSS:	    2788 kB
+VmData:	     720 kB
+VmStk:	     136 kB
+VmExe:	     120 kB
+VmLib:	    6624 kB
+VmPTE:	     196 kB
+VmSwap:	       0 kB
+Threads:	1
+SigQ:	1/3893
+SigPnd:	0000000000000000
+ShdPnd:	0000000000000000
+SigBlk:	0000000000000000
+SigIgn:	0000000000200000
+SigCgt:	00000001800b7a07
+CapInh:	0000000000000000
+CapPrm:	0000001fffffffff
+CapEff:	0000001fffffffff
+CapBnd:	0000001fffffffff
+Seccomp:	0
+Cpus_allowed:	1
+Cpus_allowed_list:	0
+Mems_allowed:	00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001
+Mems_allowed_list:	0
+voluntary_ctxt_switches:	9
+nonvoluntary_ctxt_switches:	1

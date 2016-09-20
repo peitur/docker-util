@@ -1,0 +1,41 @@
+Name:	rpc.mountd
+State:	S (sleeping)
+Tgid:	1509
+Ngid:	0
+Pid:	1236
+PPid:	1
+TracerPid:	0
+Uid:	0	0	0	0
+Gid:	0	0	0	0
+FDSize:	64
+Groups:
+VmPeak:	   44864 kB
+VmSize:	   44860 kB
+VmLck:	       0 kB
+VmPin:	       0 kB
+VmHWM:	     972 kB
+VmRSS:	     972 kB
+VmData:	     624 kB
+VmStk:	     136 kB
+VmExe:	     104 kB
+VmLib:	    4712 kB
+VmPTE:	      96 kB
+VmSwap:	       0 kB
+Threads:	1
+SigQ:	1/3893
+SigPnd:	0000000000000000
+ShdPnd:	0000000000000000
+SigBlk:	0000000000000000
+SigIgn:	0000000000011000
+SigCgt:	0000000180004a03
+CapInh:	0000000000000000
+CapPrm:	0000001fffffffff
+CapEff:	0000001fffffffff
+CapBnd:	0000001fffffffff
+Seccomp:	0
+Cpus_allowed:	1
+Cpus_allowed_list:	0
+Mems_allowed:	00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001
+Mems_allowed_list:	0
+voluntary_ctxt_switches:	1
+nonvoluntary_ctxt_switches:	2
