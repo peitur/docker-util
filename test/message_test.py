@@ -67,6 +67,16 @@ class MessageTest( unittest.TestCase ):
         self.assertEqual( str( sample_object ), self.ok_string_output[ classStr ] )
         self.assertEqual( sample_object.__dict__(), self.ok_message_list[ classStr ][0] )
 #        self.assertEqual( sample_object.__serialize__(), self.ok_serialize_output[ classStr ] )
+        self.assertEqual( sample_object.message_id().__str__() , "5" )
+        self.assertEqual( sample_object.message_sender().__str__(), "bbbb" )
+        self.assertEqual( sample_object.message_receiver().__str__() , "aaaa" )
+        self.assertEqual( sample_object.message_type().__str__() , "alarm" )
+        self.assertEqual( sample_object.message_content().__str__() , "cccccccc" )
+        self.assertEqual( type( sample_object.message_id() ).__name__ , "MessageId" )
+        self.assertEqual( type( sample_object.message_sender() ).__name__, "MessageEndpoint" )
+        self.assertEqual( type( sample_object.message_receiver() ).__name__ , "MessageEndpoint" )
+        self.assertEqual( type( sample_object.message_type() ).__name__ , "MessageType" )
+        self.assertEqual( type( sample_object.message_content() ).__name__ , "MessageData" )
 
 
     def test_request_message( self ):
@@ -79,6 +89,16 @@ class MessageTest( unittest.TestCase ):
         self.assertEqual( str( sample_object ), self.ok_string_output[ classStr ] )
         self.assertEqual( sample_object.__dict__(), self.ok_message_list[ classStr ][0] )
 #        self.assertEqual( sample_object.__serialize__(), self.ok_serialize_output[ classStr ] )
+        self.assertEqual( sample_object.message_id().__str__() , "1" )
+        self.assertEqual( sample_object.message_sender().__str__(), "bbbb" )
+        self.assertEqual( sample_object.message_receiver().__str__() , "aaaa" )
+        self.assertEqual( sample_object.message_type().__str__() , "request" )
+        self.assertEqual( sample_object.message_content().__str__() , "cccccccc" )
+        self.assertEqual( type( sample_object.message_id() ).__name__ , "MessageId" )
+        self.assertEqual( type( sample_object.message_sender() ).__name__, "MessageEndpoint" )
+        self.assertEqual( type( sample_object.message_receiver() ).__name__ , "MessageEndpoint" )
+        self.assertEqual( type( sample_object.message_type() ).__name__ , "MessageType" )
+        self.assertEqual( type( sample_object.message_content() ).__name__ , "MessageData" )
 
 
     def test_reply_message( self ):
@@ -91,6 +111,16 @@ class MessageTest( unittest.TestCase ):
         self.assertEqual( str( sample_object ), self.ok_string_output[ classStr ] )
         self.assertEqual( sample_object.__dict__(), self.ok_message_list[ classStr ][0] )
 #        self.assertEqual( sample_object.__serialize__(), self.ok_serialize_output[ classStr ] )
+        self.assertEqual( sample_object.message_id().__str__() , "2" )
+        self.assertEqual( sample_object.message_sender().__str__(), "bbbb" )
+        self.assertEqual( sample_object.message_receiver().__str__() , "aaaa" )
+        self.assertEqual( sample_object.message_type().__str__() , "reply" )
+        self.assertEqual( sample_object.message_content().__str__() , "cccccccc" )
+        self.assertEqual( type( sample_object.message_id() ).__name__ , "MessageId" )
+        self.assertEqual( type( sample_object.message_sender() ).__name__, "MessageEndpoint" )
+        self.assertEqual( type( sample_object.message_receiver() ).__name__ , "MessageEndpoint" )
+        self.assertEqual( type( sample_object.message_type() ).__name__ , "MessageType" )
+        self.assertEqual( type( sample_object.message_content() ).__name__ , "MessageData" )
 
 
     def test_info_message( self ):
@@ -103,6 +133,16 @@ class MessageTest( unittest.TestCase ):
         self.assertEqual( str( sample_object ), self.ok_string_output[ classStr ] )
         self.assertEqual( sample_object.__dict__(), self.ok_message_list[ classStr ][0] )
 #        self.assertEqual( sample_object.__serialize__(), self.ok_serialize_output[ classStr ] )
+        self.assertEqual( sample_object.message_id().__str__() , "3" )
+        self.assertEqual( sample_object.message_sender().__str__(), "bbbb" )
+        self.assertEqual( sample_object.message_receiver().__str__() , "aaaa" )
+        self.assertEqual( sample_object.message_type().__str__() , "info" )
+        self.assertEqual( sample_object.message_content().__str__() , "cccccccc" )
+        self.assertEqual( type( sample_object.message_id() ).__name__ , "MessageId" )
+        self.assertEqual( type( sample_object.message_sender() ).__name__, "MessageEndpoint" )
+        self.assertEqual( type( sample_object.message_receiver() ).__name__ , "MessageEndpoint" )
+        self.assertEqual( type( sample_object.message_type() ).__name__ , "MessageType" )
+        self.assertEqual( type( sample_object.message_content() ).__name__ , "MessageData" )
 
 
     def test_update_message( self ):
@@ -115,4 +155,30 @@ class MessageTest( unittest.TestCase ):
         self.assertEqual( str( sample_object ), self.ok_string_output[ classStr ] )
         self.assertEqual( sample_object.__dict__(), self.ok_message_list[ classStr ][0] )
 #        self.assertEqual( sample_object.__serialize__(), self.ok_serialize_output[ classStr ] )
+        self.assertEqual( sample_object.message_id().__str__() , "4" )
+        self.assertEqual( sample_object.message_sender().__str__(), "bbbb" )
+        self.assertEqual( sample_object.message_receiver().__str__() , "aaaa" )
+        self.assertEqual( sample_object.message_type().__str__() , "update" )
+        self.assertEqual( sample_object.message_content().__str__() , "cccccccc" )
+        self.assertEqual( type( sample_object.message_id() ).__name__ , "MessageId" )
+        self.assertEqual( type( sample_object.message_sender() ).__name__, "MessageEndpoint" )
+        self.assertEqual( type( sample_object.message_receiver() ).__name__ , "MessageEndpoint" )
+        self.assertEqual( type( sample_object.message_type() ).__name__ , "MessageType" )
+        self.assertEqual( type( sample_object.message_content() ).__name__ , "MessageData" )
 
+
+    def test_generic_message( self ):
+        pass
+
+    def test_generic_message_data( self ):
+        pass
+    
+    def test_generic_message_id( self ):
+        pass
+    
+    def test_generic_message_endpoint( self ):
+        pass
+    
+    def test_generic_message_type( self ):
+        pass
+    
