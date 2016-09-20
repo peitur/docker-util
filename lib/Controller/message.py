@@ -284,4 +284,10 @@ if __name__ == "__main__":
     pprint( decode_message( UpdateMessage("4", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
     pprint( decode_message( AlarmMessage("5", "aaaa", "bbbb","cccccccc" ).__serialize__() ).__str__() )
 
+    print( "%s" % ( RequestMessage("1", "aaaa", "bbbb","cccccccc" ).__serialize__() ) )
+    print( "%s" % ( ReplyMessage("2", "aaaa", "bbbb","cccccccc" ).__serialize__() ) )
+    print( "%s" % ( InfoMessage("3", "aaaa", "bbbb","cccccccc" ).__serialize__() ) )
+    print( "%s" % ( UpdateMessage("4", "aaaa", "bbbb","cccccccc" ).__serialize__() ) )
+    print( "%s" % ( AlarmMessage("5", "aaaa", "bbbb","cccccccc" ).__serialize__() ) )
+
     pass

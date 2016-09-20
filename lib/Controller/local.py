@@ -308,33 +308,22 @@ class SystemInformation( Information ):
         
         super( ProcessInformation, self ).__init__()
 
+        self.__default_format = "object"
+        if 'format' in options and options['format'] in ( "object","json","str", "string" ):
+            self.__default_format = options['format']
+        
         self.__cache_data = False  
         self.__cache_dirty = False
 
 
-        if 'cached' in config:
+        if 'cached' in options:
             self.__cache_data = True    
             self.__cache_dirty = True
-
-        if self.__cache_data and self.__cache_dirty:
-            self.__process_info = ProcessTreeInformation()
-            self.__memory_info = MemoryInformation()
-            self.__systemload_info = SystemLoadInformation()
-            self.__cpu_info = CpuInformation()
-    
-            self.__docker_info = None
-    
-            self.__process_info.load_data()
-            self.__memory_info.load_data()
-            self.__systemload_info.load_data()
-            self.__cpu_info.load_data()
-
-            self.__cache_dirty = False
 
 
     def get( self, what, **options ):
         
-        formt = 'object'
+        formt = self.__default_format
         if 'format' in options and options['format'] in ( "object","json","str", "string" ):
             formt = options['format']
         
@@ -350,7 +339,10 @@ class SystemInformation( Information ):
             raise AttributeError("ERROR: Type %s not supported" % ( what ) )
 
 
-
+    def load_data( self ):
+        pass
+    
+    
     def __str__( self ):
         pass
 
