@@ -202,7 +202,7 @@ class CpuInformation( Information ):
         self.__cpu_fields = ['processor','vendor_id','model name','cpu mzh','bogmips']
         self.__cpu_data = []
         self.__rotate = self.__cpu_fields[0]
-        self.__cpu_filename = "%(path)s/%(fn)s" % { 'path':PROC, 'fn': CPUFILE }
+        self.__cpu_filename = Path( "%(path)s/%(fn)s" % { 'path':PROC, 'fn': CPUFILE } )
 
     def load_data( self ):
 
@@ -217,6 +217,8 @@ class CpuInformation( Information ):
                 self.__cpu_data.append( data )
                 data = {}
 
+
+        return len( self.__cpu_data )
 
     def __str__( self ):
         pass        
@@ -234,16 +236,33 @@ class SystemLoadInformation(Information):
     '''
     def __init__(self):
         super( SystemLoadInformation, self ).__init__()
-        pass
+        self.__load_fields = ['1m','5m','15m','qs','np']
+        self.__load_data = {}
+        self.__load_filename = Path( "%(path)s/%(fn)s" % { 'path': PROC, 'fn': LOADFILE } )
+        
+    def load_data( self ):
 
+        try:
+            fd = open( self.__load_filename.__str__(), "r" )
+            line = fd.readline().lstrip().rstrip()
+            fd.close()
+
+            for i, x in enumerate( re.split( r"\s+", line ) ):
+                self.__load_data[ self.__load_fields[i] ] = x
+
+        except Exception as error:
+            pprint( error )
+            
+        return len( self.__load_data.keys() )
+    
     def __str__( self ):
         pass
 
     def __serialize__( self ):
-        pass
+        return json.dumps( self.__dict__() )
 
     def __dict__( self ):
-        pass
+        return self.__load_data 
 
 
 
@@ -359,6 +378,8 @@ if __name__ == "__main__":
     
     ci = CpuInformation( )
     ci.load_data()
-    
     pprint( ci.__serialize__() )
     
+    avi = SystemLoadInformation( )
+    avi.load_data()
+    pprint( avi.__serialize__() )
