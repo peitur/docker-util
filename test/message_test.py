@@ -37,8 +37,10 @@ class MessageTest( unittest.TestCase ):
         }
 
         self.nok_message_list = {
-            'RequestMessage': [{"to": "aaaa", "content": "cccccccc", "id": "1", "from": "bbbb", "type": "test"}]
+            'RequestMessage': [{"to": "aaaa", "content": "cccccccc", "id": "1", "from": "bbbb", "type": "test"}],
+            'Message': [{"to": "aaaa", "content": "cccccccc", "id": "0", "from": "bbbb", "type": "message"}]
         }
+        
 
 
     def tearDown( self ):
@@ -168,17 +170,15 @@ class MessageTest( unittest.TestCase ):
 
 
     def test_generic_message( self ):
-        pass
+        classStr = "Message"
+        
+        for a in self.ok_message_list:
+            for b in self.ok_message_list[a]:
+                Message( b['id'], b['type'], b['to'], b['from'], b['content'] )
 
-    def test_generic_message_data( self ):
-        pass
-    
-    def test_generic_message_id( self ):
-        pass
-    
-    def test_generic_message_endpoint( self ):
-        pass
-    
-    def test_generic_message_type( self ):
-        pass
-    
+        for a in self.nok_message_list:
+            for sample in self.nok_message_list[a]:
+                with self.assertRaises( AttributeError ) as test:
+                    Message( sample['id'], sample['type'], sample['to'],sample['from'], sample['content'] ) 
+
+
