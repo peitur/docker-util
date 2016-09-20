@@ -5,7 +5,7 @@ PYTHON3=$(which python3)
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
 
-MODLIST="message_test.py"
+MODLIST="message_test.py local_test.py"
 for mod in ${MODLIST};
 do
   TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
