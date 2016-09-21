@@ -5,7 +5,7 @@ def is_integer( d ):
     return False
     
 def is_boolean( d ):
-    if type( d ).__name__ == 'boolean':
+    if type( d ).__name__ == 'bool':
         return True
     return False
     
