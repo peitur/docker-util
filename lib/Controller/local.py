@@ -48,7 +48,7 @@ class Information:
 
 
 
-class ProcessInformation(Information):
+class ProcessInformation( Information ):
     '''
         Contains information of one process
     '''
@@ -130,7 +130,7 @@ class ProcessTreeInformation( Information ):
         return self.__process_list
 
     def get_pid( self, pid ):
-        return self.__process_list[ p ]
+        return self.__process_list[ pid ]
 
     def filter( self, k = None ):
         if not k: raise AttributeError("ERROR: Missing key in filter")

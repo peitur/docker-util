@@ -3,5 +3,6 @@
     "mode":"agent",
     "home":"/opt/docker-util",
     "keyfile":"<|home|>/du-key.pub",
-    "controller":["123.123.123.1","123.123.123.2"]
+    "controller":["123.123.123.1","123.123.123.2"],
+    "peer":[]
 }

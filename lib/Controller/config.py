@@ -50,7 +50,6 @@ class ConfigContent( SingInstance ):
                 varlist[ item ] = self.__config[ item ]
 
 #######################
-        
 
     def load_data( self, filename = None ):
 
@@ -78,6 +77,11 @@ class ConfigContent( SingInstance ):
         return len( self.__config.keys() )
 
 
+    def env( self, key ):
+        try:
+            return os.environ[ key ]
+        except:
+            return None
 
     def filename( self ):
         return self.__filename
