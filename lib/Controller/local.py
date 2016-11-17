@@ -76,7 +76,7 @@ class ProcessInformation( Information ):
                 if larray[0] in self.__process_fields:
                     self.__process_info[ larray[0] ] = larray[1]
             fd.close()
-        
+
         return len( self.__process_info )
 
     def get_statusfile( self ):
@@ -174,14 +174,14 @@ class MemoryInformation(Information):
 
 
     def load_data( self ):
-        
+
         with open( self.__memory_file.__str__(), "r" ) as fd:
             for line in fd:
                 larray = re.split( r"\s+", re.sub( r":","", line ).lower() )
                 if larray[0] in self.__memory_fields:
                     self.__memory_info[ larray[0] ] = larray[1]
             fd.close()
-            
+
         return len( self.__memory_info )
 
     def filter( self, k = None ):
@@ -230,7 +230,7 @@ class CpuInformation( Information ):
                 larray = [ x.lstrip().rstrip() for x in re.split( r":", line ) ]
                 if larray[0].lower() in self.__cpu_fields:
                     data[ larray[0].lower() ] = larray[1]
-            
+
                 if self.__rotate == larray[0].lower() and self.__rotate in data:
                     self.__cpu_data.append( data )
                     data = {}
@@ -238,7 +238,7 @@ class CpuInformation( Information ):
         return len( self.__cpu_data )
 
     def __str__( self ):
-        pass        
+        pass
 
     def __serialize__( self ):
         return json.dumps( self.__dict__() )
@@ -256,11 +256,11 @@ class SystemLoadInformation(Information):
         self.__load_fields = ['1m','5m','15m','qs','np']
         self.__load_data = {}
         self.__load_filename = Path( "%(path)s/%(fn)s" % { 'path': PROC, 'fn': LOADFILE } )
-        
+
         if 'filename' in options:
             self.__load_filename = Path( options['filename'] )
-        
-        
+
+
     def load_data( self ):
 
         try:
@@ -273,9 +273,9 @@ class SystemLoadInformation(Information):
 
         except Exception as error:
             pprint( error )
-            
+
         return len( self.__load_data.keys() )
-    
+
     def __str__( self ):
         pass
 
@@ -283,7 +283,7 @@ class SystemLoadInformation(Information):
         return json.dumps( self.__dict__() )
 
     def __dict__( self ):
-        return self.__load_data 
+        return self.__load_data
 
 
 
@@ -326,28 +326,30 @@ class DockerInformation(Information):
 class SystemInformation( Information ):
 
     def __init__(self, **options ):
-        
+
         super( ProcessInformation, self ).__init__( options )
 
         self.__default_format = "object"
         if 'format' in options and options['format'] in ( "object","json","str", "string" ):
             self.__default_format = options['format']
-        
-        self.__cache_data = False  
+
+        self.__cache_data = False
         self.__cache_dirty = False
 
         if 'cached' in options:
-            self.__cache_data = True    
+            self.__cache_data = True
             self.__cache_dirty = True
 
 
-    def get( self, what, **options ):
-        
+    def get( self, what=None, **options ):
+
         formt = self.__default_format
         if 'format' in options and options['format'] in ( "object","json","str", "string" ):
             formt = options['format']
-        
-        if what in ("cpu"):
+
+        if not what:
+            pass
+        elif what in ("cpu"):
             pass
         elif what in ("process"):
             pass
@@ -361,8 +363,8 @@ class SystemInformation( Information ):
 
     def load_data( self ):
         pass
-    
-    
+
+
     def __str__( self ):
         pass
 
@@ -387,11 +389,11 @@ if __name__ == "__main__":
 
     pprint( pti.__serialize__() )
     pprint( mi.__serialize__() )
-    
+
     ci = CpuInformation( )
     ci.load_data()
     pprint( ci.__serialize__() )
-    
+
     avi = SystemLoadInformation( )
     avi.load_data()
     pprint( avi.__serialize__() )
