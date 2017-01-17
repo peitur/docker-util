@@ -1,11 +1,11 @@
 import os, sys, re, datetime
 import json
+import docker
 
 from datetime import datetime, date, time
 from pathlib import Path
 from io import BytesIO
 
-from docker import Client, tls
 
 from pprint import pprint
 

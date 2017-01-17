@@ -2,23 +2,25 @@
 import os, sys, re, datetime
 import json
 
+import Controller.message
+import Controller.local
 
 #########################################################################
 
 
-class Information:
+class Information( object ):
     def __init__(self):
         pass
 
 
-class Configuration:
+class Configuration( object ):
     def __init__(self):
         pass
 
 
 #########################################################################
 
-class ConfigInformation( Information, ConfigInformation ):
+class ConfigInformation( Information, Configuration ):
     def __init__(self):
         pass
 

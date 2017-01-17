@@ -1,8 +1,18 @@
 
 from . import message
 from . import local
+from . import sysinfo
 
 __all__ = []
+
+## Adding sysinfo classes
+__all__ += ["Information"]
+__all__ += ["Configuration"]
+__all__ += ["ConfigInformation"]
+__all__ += ["MemoryInformation"]
+__all__ += ["CpuInformation"]
+__all__ += ["ProcessInformation"]
+
 
 ## Adding message module classes
 __all__ += ['MessageId']
