@@ -11,6 +11,11 @@ from pprint import pprint
 ## =============================================================
 ## utils
 ## =============================================================
+
+## -----------------------------------------
+# dirtree: builds rec. file list
+# - path        : root path to start from
+# - rx          : regexp used to filer wanted files
 def dirtree( path, rx=r".*" ):
     result = list()
     for f in os.listdir( path ):
@@ -38,7 +43,7 @@ def file_is_type( filename, tp ):
 
 
 ## -----------------------------------------
-# Run one command,
+# _run_command: Run one command,
 # - cmd_list    : command and arguments as list
 # - opt         : dict of options
 #   : debug     : debug info in function
@@ -55,8 +60,8 @@ def _run_command( cmd, **opt ):
         result.append( line.lstrip().rstrip() )
     return result
 
-
-# Run one command, return each printed line to caller (called by "with"/"for" )
+## ----------------------------------
+# _run_command_line: Run one command, return each printed line to caller (called by "with"/"for" )
 # - cmd_list    : command and arguments as list
 # - opt         : dict of options
 #   : debug     : debug info in function
@@ -70,7 +75,12 @@ def _run_command_line( cmd, **opt ):
         cmd = shlex.split( cmd )
 
 
-
+## -----------------------------------------
+# _read_text_file: read a text file
+# - cmd_list    : command and arguments as list
+# - opt         : dict of options
+#   : debug     : debug info in function
+# Returns: string list of all lines
 def _read_text_file( filename, **options ):
     with_comments = False
     if 'with_comments' in options and options['with_comments'] in (True, False):
@@ -97,10 +107,11 @@ def _read_text_file( filename, **options ):
     return result
 
 ## -----------------------------------------
-# Read a json file and return the content as dict
+# _read_json_file: Read a json file and return the content as dict
 # - filename    : filename
 # - opt         : dict of options
 #   : debug     : debug info in function
+# Returns: the json structure as a dict
 def _read_json_file( filename, **options ):
     p = pathlib.Path( filename )
 
