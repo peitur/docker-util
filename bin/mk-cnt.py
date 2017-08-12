@@ -4,7 +4,7 @@
 import os, re, sys, getopt
 import multiprocessing
 import subprocess, shlex
-import json
+import json, pathlib
 from pprint import pprint
 
 
@@ -72,7 +72,6 @@ def _run_command_line( cmd, **opt ):
 
 
 def _read_text_file( filename, **options ):
-    debug = set_debug( **options )
     with_comments = False
     if 'with_comments' in options and options['with_comments'] in (True, False):
         with_comments = options['with_comments']
@@ -103,8 +102,6 @@ def _read_text_file( filename, **options ):
 # - opt         : dict of options
 #   : debug     : debug info in function
 def _read_json_file( filename, **options ):
-    debug = set_debug( **options )
-
     p = pathlib.Path( filename )
 
     if not p.exists():
@@ -117,11 +114,61 @@ def _read_json_file( filename, **options ):
          return json.load( jd )
 
 
+def print_help( **opt ):
+    print("# Help: %s" % ( opt['script'] ) )
+    pprint( opt )
 
 
 if __name__ == "__main__":
 
+    conf = dict()
     conf['debug'] = False
+    conf['help'] = False
+    conf['config-file'] = None
+    conf['target-file'] = None
+    conf['build-dir'] = None
+    conf['version'] = None
+    conf['tags'] = None
+
     conf['script'] = sys.argv.pop(0)
 
-    
+    options = dict()
+
+    try:
+        opts, args = getopt.getopt(sys.argv, "hdc:d:b:v:T:", ["help", "debug","config=","target-file=","build-dir=","version=","tags="])
+    except getopt.GetoptError as err:
+        print(err) # will print something like "option -a not recognized"
+        print_help( **options )
+        sys.exit(2)
+
+    for o, a in opts:
+        if o in ("-d","--debug"): conf['debug'] = True
+        elif o in ("-h","--help"): conf['help'] = True
+        elif o in ("-c","--config"): conf['config-file'] = a
+        elif o in ("-b", "--build-dir"): conf['build-dir'] = a
+        elif o in ("-t", "--target-file"): conf['target-file'] = a
+        elif o in ("-v", "--version"): conf['version'] = a
+        elif o in ("-T", "--tags"): conf['tags'] = a
+
+    if conf['tags']:
+        conf['tags'] = re.split(",", conf['tags'] )
+
+    try:
+        if not conf['config-file']: raise RuntimeError("Missing configuration file!")
+        if not conf['version']: raise RuntimeError("Missing build version!")
+        if not conf['build-dir']: raise RuntimeError("Missing build directory!")
+
+    except Exception as e:
+        print( "ERROR: %s" % (e) )
+        sys.exit(1)
+
+    try:
+        options = _read_json_file( conf['config-file'] )
+    except Exception as e:
+        print("EROOR Failed to parse configuration")
+        print("ERROR: %s" % (e))
+
+    pprint( conf )
+    pprint( options )
+
+sys.exit(0)
