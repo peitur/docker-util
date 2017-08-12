@@ -7,6 +7,15 @@ import subprocess, shlex
 import json, pathlib
 from pprint import pprint
 
+YUM={
+    "cmd":"yum",
+    "config":"/etc/yum.conf",
+    "target":None,
+    "action":"install",
+    "options":["tsflags=nodocs","group_package_types=mandatory"],
+    "args":["--releasever=/", "-y"],
+    "list":None
+}
 
 ## =============================================================
 ## utils
@@ -41,6 +50,34 @@ def file_is_type( filename, tp ):
     return False
 
 
+def _build_yum_command( lst, **opt ):
+
+    y = dict( YUM )
+    result = list()
+
+    if 'target' in opt: y['target'] = [ "--installroot=%s" %( opt['target'] ) ]
+    if 'action' in opt: y['action'] = opt['action']
+    if 'config' in opt: y['config'] = opt['config']
+
+    y['list'] = lst
+
+    result.append( y['cmd'] )
+
+    if 'config' in y and y['config']:
+        result.append( '-c' )
+        result.append( y['config'] )
+
+    if y['target'] and len( y['target'] ) > 0:
+        for x in y['target']: result.append( x )
+
+    for x in y['options']:
+        result.append( "--setopt=%s" % ( x ) )
+
+    result.append( y['action'] )
+    for x in y['args']: result.append( x )
+    for x in y['list']: result.append( x )
+
+    return result
 
 ## -----------------------------------------
 # _run_command: Run one command,
@@ -49,11 +86,14 @@ def file_is_type( filename, tp ):
 #   : debug     : debug info in function
 def _run_command( cmd, **opt ):
     debug = False
+    test = False
     if 'debug' in 'opt': debug = opt['debug']
+    if 'test' in 'opt': test = opt['test']
 
     result = list()
     if type( cmd ).__name__ == "str":
         cmd = shlex.split( cmd )
+
 
     prc = subprocess.Popen( cmd, universal_newlines=True, stdout=subprocess.PIPE )
     for line in prc.stdout.readlines():
@@ -134,6 +174,8 @@ if __name__ == "__main__":
 
     conf = dict()
     conf['debug'] = False
+    conf['test'] = True
+
     conf['help'] = False
     conf['config-file'] = None
     conf['target-file'] = None
@@ -181,5 +223,13 @@ if __name__ == "__main__":
 
     pprint( conf )
     pprint( options )
+
+    for cnt in options:
+        pprint( _build_yum_command( cnt['base-packages'], target=conf['build-dir'], action="install" ) )
+
+    # 1. create build dir
+    # 2. create device nodes
+    # 3. prepare yum and yum repos
+    # 4. install base packages with yum target
 
 sys.exit(0)
