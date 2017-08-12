@@ -1,0 +1,15 @@
+[
+  {
+    "name":"test",
+    "version":"latest",
+    "author":"",
+    "tag":"",
+    "package-manager":"yum",
+    "base-group":"base",
+    "base-packages":["yum"],
+    "strip-paths":[],
+    "install-packages":[],
+    "remove-packages":[],
+    "post-script":[]
+  }
+]
