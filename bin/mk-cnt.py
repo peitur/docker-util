@@ -41,7 +41,8 @@ COMMANDS={
     "copy":{
         "cmd":"cp",
         "args":[],
-        "path":None
+        "from":None,
+        "to":None
     },
     "rm":{
         "cmd":"rm",
@@ -199,17 +200,50 @@ def _build_mkdir_command( path, **opt ):
 
     return result
 
-def _build_chroot_command( runlist, **opt ):
-    pass
+def _build_chroot_command( path, cmd, runlist, **opt ):
+    n = dict( COMMANDS['chroot'] )
+    result = list()
 
-def _build_copy_command( from, to, **opt ):
-    pass
+    return result
+
+
+def _build_copy_command( fromfile, tofile, **opt ):
+    n = dict( COMMANDS['copy'] )
+    result = list()
+
+    n['from'] = re.sub( r"\/+", "/", fromfile )
+    n['to'] = re.sub( r"\/+", "/", tofile )
+
+    if 'args' in opt: n['args'] = opt['args']
+
+    result.append( n['cmd'] )
+
+    if n['args']:
+        for x in n['args']:
+            result.append( x )
+
+    if n['mode']:
+        result.append( "-m" )
+        result.append( n['mode'] )
+
+    result.append( n['path'] )
+    result.append( n['to'] )
+
+    return result
 
 def _build_rm_command( file, **opt ):
-    pass
+    n = dict( COMMANDS['rm'] )
+    result = list()
+
+    return result
+
 
 def _build_tar_command( filename, path, **opt ):
-    pass
+    n = dict( COMMANDS['tar'] )
+    result = list()
+
+    return result
+
 
 ## -----------------------------------------
 # _run_command: Run one command,
