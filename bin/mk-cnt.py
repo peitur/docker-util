@@ -7,15 +7,51 @@ import subprocess, shlex
 import json, pathlib
 from pprint import pprint
 
-YUM={
-    "cmd":"yum",
-    "config":"/etc/yum.conf",
-    "target":None,
-    "action":"install",
-    "options":["tsflags=nodocs","group_package_types=mandatory"],
-    "args":["--releasever=/", "-y"],
-    "list":None
+COMMANDS={
+    "yum":{
+        "cmd":"yum",
+        "config":"/etc/yum.conf",
+        "target":None,
+        "action":"install",
+        "options":["tsflags=nodocs","group_package_types=mandatory"],
+        "args":["--releasever=/", "-y"],
+        "list":None
+    },
+    "mknod":{
+        "cmd":"mknod",
+        "mode":"666",
+        "path":None,
+        "type":"c",
+        "minor":None,
+        "major":None
+    }
 }
+
+# mkdir -m 755 "$target"/dev
+# mknod -m 600 "$target"/dev/console c 5 1
+# mknod -m 600 "$target"/dev/initctl p
+# mknod -m 666 "$target"/dev/full c 1 7
+# mknod -m 666 "$target"/dev/null c 1 3
+# mknod -m 666 "$target"/dev/ptmx c 5 2
+# mknod -m 666 "$target"/dev/random c 1 8
+# mknod -m 666 "$target"/dev/tty c 5 0
+# mknod -m 666 "$target"/dev/tty0 c 4 0
+# mknod -m 666 "$target"/dev/urandom c 1 9
+# mknod -m 666 "$target"/dev/zero c 1 5
+
+DEVICES=[
+#     { 'file': "", 'mode':"", 'type':"", "major":"", "minor":"" }
+    { 'file': "/dev/console", 'mode':"600", 'type':"c", "major":"5", "minor":"1" },
+    { 'file': "/dev/initctl", 'mode':"666", 'type':"p", 'major':None, 'minor': None },
+    { 'file': "/dev/full", 'mode':"666", 'type':"c", "major":"1", "minor":"7" },
+    { 'file': "/dev/null", 'mode':"666", 'type':"c", "major":"1", "minor":"3" },
+    { 'file': "/dev/ptmx", 'mode':"666", 'type':"c", "major":"5", "minor":"2" },
+    { 'file': "/dev/random", 'mode':"666", 'type':"c", "major":"1", "minor":"8" },
+    { 'file': "/dev/tty", 'mode':"666", 'type':"c", "major":"5", "minor":"0" },
+    { 'file': "/dev/tty0", 'mode':"666", 'type':"c", "major":"4", "minor":"0" },
+    { 'file': "/dev/urandom", 'mode':"666", 'type':"c", "major":"1", "minor":"9" },
+    { 'file': "/dev/zero", 'mode':"666", 'type':"c", "major":"1", "minor":"5" }
+]
 
 ## =============================================================
 ## utils
@@ -52,7 +88,7 @@ def file_is_type( filename, tp ):
 
 def _build_yum_command( lst, **opt ):
 
-    y = dict( YUM )
+    y = dict( COMMANDS['yum'] )
     result = list()
 
     if 'target' in opt: y['target'] = [ "--installroot=%s" %( opt['target'] ) ]
@@ -78,6 +114,39 @@ def _build_yum_command( lst, **opt ):
     for x in y['list']: result.append( x )
 
     return result
+
+
+def _build_mknod_command( path, ntype='c', **opt ):
+    n = dict( COMMANDS['mknod'] )
+    result = list()
+
+    n['path'] = path
+    n['type'] = ntype
+
+    if 'mode' in opt: n['mode'] = opt['mode']
+    if 'major' in opt: n['major'] = opt['major']
+    if 'minor' in opt: n['minor'] = opt['minor']
+
+    result.append( n['cmd'] )
+    result.append( path )
+    if n['mode']:
+        result.append( "-m" )
+        result.append( n['mode'] )
+
+    result.append( n['type'] )
+    if opt['major']: result.append( n['major'] )
+    if opt['minor']: result.append( n['minor'] )
+
+    return result
+
+def _build_devices( buildroot, dev_list, **opt ):
+    result = list()
+
+    for d in dev_list:
+        path = re.sub( r"\/+", "/", "%s/%s" % ( buildroot, d['file'] ) )
+        result.append( _build_mknod_command( path, d['type'], mode=d['mode'], minor=d['minor'], major=d['major'] ) )
+    return result
+
 
 ## -----------------------------------------
 # _run_command: Run one command,
@@ -231,5 +300,7 @@ if __name__ == "__main__":
     # 2. create device nodes
     # 3. prepare yum and yum repos
     # 4. install base packages with yum target
+
+    pprint( _build_devices( conf['build-dir'], DEVICES, debug=conf['debug'] ) )
 
 sys.exit(0)
