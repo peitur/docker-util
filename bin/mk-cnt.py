@@ -24,6 +24,35 @@ COMMANDS={
         "type":"c",
         "minor":None,
         "major":None
+    },
+    "mkdir":{
+        "cmd":"mkdir",
+        "mode":None,
+        "args":["-p"],
+        "path":None
+    },
+    "chroot":{
+        "cmd":"chroot",
+        "path":None,
+        "exec":"/bin/bash",
+        "name":"EOF",
+        "run":[]
+    },
+    "copy":{
+        "cmd":"cp",
+        "args":[],
+        "path":None
+    },
+    "rm":{
+        "cmd":"rm",
+        "args":[],
+        "path":None
+    },
+    "tar":{
+        "cmd":"tar",
+        "args":[],
+        "file":None,
+        "path":None
     }
 }
 
@@ -147,6 +176,40 @@ def _build_devices( buildroot, dev_list, **opt ):
         result.append( _build_mknod_command( path, d['type'], mode=d['mode'], minor=d['minor'], major=d['major'] ) )
     return result
 
+def _build_mkdir_command( path, **opt ):
+    n = dict( COMMANDS['mkdir'] )
+    result = list()
+
+    n['path'] = re.sub( r"\/+", "/", path )
+
+    if 'mode' in opt: n['mode'] = opt['mode']
+    if 'args' in opt: n['args'] = opt['args']
+
+    result.append( n['cmd'] )
+
+    if n['args']:
+        for x in n['args']:
+            result.append( x )
+
+    if n['mode']:
+        result.append( "-m" )
+        result.append( n['mode'] )
+
+    result.append( n['path'] )
+
+    return result
+
+def _build_chroot_command( runlist, **opt ):
+    pass
+
+def _build_copy_command( from, to, **opt ):
+    pass
+
+def _build_rm_command( file, **opt ):
+    pass
+
+def _build_tar_command( filename, path, **opt ):
+    pass
 
 ## -----------------------------------------
 # _run_command: Run one command,
@@ -233,6 +296,12 @@ def _read_json_file( filename, **options ):
     with p.open( mode="r", buffering = -1 ) as jd:
          return json.load( jd )
 
+def _write_text_file( filename, data, **options ):
+    pass
+
+def _write_json_file( filename, data, **options  ):
+    pass
+
 
 def print_help( **opt ):
     print("# Help: %s" % ( opt['script'] ) )
@@ -301,6 +370,7 @@ if __name__ == "__main__":
     # 3. prepare yum and yum repos
     # 4. install base packages with yum target
 
+    pprint( _build_mkdir_command( "%s/%s" % (conf['build-dir'], "/dev"), mode="755", args=["-p"], debug=conf['debug'] ) )
     pprint( _build_devices( conf['build-dir'], DEVICES, debug=conf['debug'] ) )
 
 sys.exit(0)
