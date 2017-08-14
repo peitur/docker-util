@@ -122,9 +122,13 @@ def _build_yum_command( lst, **opt ):
     y = dict( COMMANDS['yum'] )
     result = list()
 
+    if type( lst ).__name__ == "str": lst = [ lst ]
     if 'target' in opt: y['target'] = [ "--installroot=%s" %( opt['target'] ) ]
     if 'action' in opt: y['action'] = opt['action']
     if 'config' in opt: y['config'] = opt['config']
+    if 'options' in opt: y['options'] = opt['options']
+    if 'args' in opt: y['args'] = opt['args']
+
 
     y['list'] = lst
 
@@ -355,7 +359,16 @@ def _read_json_file( filename, **options ):
          return json.load( jd )
 
 def _write_text_file( filename, data, **options ):
-    pass
+
+    filename = re.sub( r"\/+", "/", filename )
+
+    if type( data ).__name__ == "list":
+        data = "\n".join( data )
+
+    pprint( [ "%s" % (filename) , data ] )
+#    fd = open( filename, "w" )
+#    fd.write( data )
+#    fd.close()
 
 def _write_json_file( filename, data, **options  ):
     pass
@@ -421,19 +434,62 @@ if __name__ == "__main__":
     pprint( options )
 
     for cnt in options:
-        pprint( _build_yum_command( cnt['base-packages'], target=conf['build-dir'], action="install" ) )
+        print("# --------------------------------------------------")
+        print("# Processing container %s-%s ..."  % ( cnt['name'], cnt['version'] ) )
 
     # 1. create build dir
     # 2. create device nodes
     # 3. prepare yum and yum repos
     # 4. install base packages with yum target
-
+        print("# -- Create base devices...")
         pprint( _build_mkdir_command( "%s/%s" % (conf['build-dir'], "/dev"), mode="755", args=["-p"], debug=conf['debug'] ) )
         pprint( _build_devices( conf['build-dir'], DEVICES, debug=conf['debug'] ) )
-        pprint( _build_chroot_command( conf['build-dir'], ["ls", "pwd"], debug=conf['debug'] ))
+
+        if len( cnt['base-group'] ) > 0:
+            print("# -- YUM Install base group...")
+            pprint( _build_yum_command( cnt['base-group'], target=conf['build-dir'], action="groupinstall" , debug=conf['debug']) )
+
+        if len( cnt['base-packages'] ) > 0:
+            print("# -- YUM Install base packages...")
+            pprint( _build_yum_command( cnt['base-packages'], target=conf['build-dir'], action="install", debug=conf['debug'] ) )
+
+        if len( cnt['install-groups'] ) > 0:
+            print("# -- YUM Install requested groups...")
+            pprint( _build_yum_command( cnt['install-groups'], target=conf['build-dir'], action="groupinstall" , debug=conf['debug']) )
+
+        if len( cnt['install-packages'] ) > 0:
+            print("# -- YUM Install requested packages...")
+            pprint( _build_yum_command( cnt['install-packages'], target=conf['build-dir'], action="install", debug=conf['debug'] ) )
+
+        print("# --  YUM clean all ...")
+        pprint( _build_yum_command( ['all'], target=conf['build-dir'], options=[], args=[], action="clean" , debug=conf['debug']) )
+
+
+        print("# -- Clean up unwanted files, strip to minimize...")
+        for strp in cnt['strip-paths']:
+            pprint( _build_rm_command( "%s/%s" % (conf['build-dir'], strp ), args=['-rf'], debug=conf['debug'] ) )
+
+        print("# --- Clenaing yum cached files ... ")
+        pprint( _build_rm_command( "%s/%s" % (conf['build-dir'], "/var/cache/yum"), args=['-rf'], debug=conf['debug'] ) )
+        pprint( _build_mkdir_command( "%s/%s" % (conf['build-dir'], "/var/cache/yum"), mode="0755", args=['p'], debug=conf['debug'] ) )
+
+        print("# --- Cleaning ldconfig caches ...")
+        pprint( _build_rm_command( "%s/%s" % (conf['build-dir'], "/etc/ld.so.cache"), args=['-rf'], debug=conf['debug'] ) )
+        pprint( _build_rm_command( "%s/%s" % (conf['build-dir'], "/var/cache/ldconfig"), args=['-rf'], debug=conf['debug'] ) )
+        pprint( _build_mkdir_command( "%s/%s" % (conf['build-dir'], "/var/cache/ldconfig"), mode="0755", args=['p'], debug=conf['debug'] ) )
+
+
+        print("# -- Enable networking...")
+        _write_text_file( "%s/%s" % ( conf['build-dir'], "/etc/sysconfig/network"), [ "NETWORKING=yes","HOSTNAME=localhost.localdomain" ] )
+
+        print("# -- Copying system files into container...")
         pprint( _build_copy_command( "/etc/hosts", "%s/%s" % (conf['build-dir'], "/etc/hosts"), debug=conf['debug'] ) )
 
-        pprint( _build_rm_command( "%s/%s" % (conf['build-dir'], "/etc/hosts"), debug=conf['debug'] ) )
-        pprint( _build_tar_command( "%s-%s.tgz" % ( cnt['name'], cnt['version'] ), conf['build-dir'], debug=conf['debug'] ) )
+        if len( cnt['post-script'] ) > 0:
+            print("# -- Clean up unwanted files, strip to minimize...")
+            pprint( _build_chroot_command( conf['build-dir'], ["ls", "pwd"], debug=conf['debug'] ))
+
+        print("# -- Build resulting contained image file...")
+        pprint( _build_tar_command( "%s-%s.tgz" % ( cnt['name'], cnt['version'] ), conf['build-dir'], args=['--numeric-owner','--directory=%s'%(conf['build-dir']),'-cf'], debug=conf['debug'] ) )
 
 sys.exit(0)
