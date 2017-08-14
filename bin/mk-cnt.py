@@ -83,6 +83,7 @@ DEVICES=[
     { 'file': "/dev/zero", 'mode':"666", 'type':"c", "major":"1", "minor":"5" }
 ]
 
+
 ## =============================================================
 ## utils
 ## =============================================================
@@ -150,7 +151,7 @@ def _build_mknod_command( path, ntype='c', **opt ):
     n = dict( COMMANDS['mknod'] )
     result = list()
 
-    n['path'] = path
+    n['path'] = re.sub( r"\/+", "/", path )
     n['type'] = ntype
 
     if 'mode' in opt: n['mode'] = opt['mode']
@@ -200,9 +201,15 @@ def _build_mkdir_command( path, **opt ):
 
     return result
 
-def _build_chroot_command( path, cmd, runlist, **opt ):
+def _build_chroot_command( path, runlist=[], **opt ):
     n = dict( COMMANDS['chroot'] )
     result = list()
+
+    n['path'] = re.sub( r"\/+", "/", path )
+
+    result.append( "%s %s %s <<%s" % ( n['cmd'], path, n['exec'], n['name'] ) )
+    result.append( runlist )
+    result.append( n['name'] )
 
     return result
 
@@ -222,18 +229,24 @@ def _build_copy_command( fromfile, tofile, **opt ):
         for x in n['args']:
             result.append( x )
 
-    if n['mode']:
-        result.append( "-m" )
-        result.append( n['mode'] )
-
-    result.append( n['path'] )
+    result.append( n['from'] )
     result.append( n['to'] )
 
     return result
 
-def _build_rm_command( file, **opt ):
+def _build_rm_command( path, **opt ):
     n = dict( COMMANDS['rm'] )
     result = list()
+
+    n['path'] = re.sub( r"\/+", "/", path )
+
+    if 'args' in opt: n['args'] = opt['args']
+
+    result.append( n['cmd'] )
+    for x in n['args']:
+        result.append( x )
+
+    result.append( n['path'] )
 
     return result
 
@@ -241,6 +254,17 @@ def _build_rm_command( file, **opt ):
 def _build_tar_command( filename, path, **opt ):
     n = dict( COMMANDS['tar'] )
     result = list()
+
+    n['file'] = re.sub( r"\/+", "/", filename )
+    n['path'] = re.sub( r"\/+", "/", path )
+    if 'args' in opt: n['args'] = opt['args']
+
+    result.append( n['cmd'] )
+    for x in n['args']:
+        result.append( x )
+
+    result.append( n['file'] )
+    result.append( n['path'] )
 
     return result
 
@@ -404,7 +428,12 @@ if __name__ == "__main__":
     # 3. prepare yum and yum repos
     # 4. install base packages with yum target
 
-    pprint( _build_mkdir_command( "%s/%s" % (conf['build-dir'], "/dev"), mode="755", args=["-p"], debug=conf['debug'] ) )
-    pprint( _build_devices( conf['build-dir'], DEVICES, debug=conf['debug'] ) )
+        pprint( _build_mkdir_command( "%s/%s" % (conf['build-dir'], "/dev"), mode="755", args=["-p"], debug=conf['debug'] ) )
+        pprint( _build_devices( conf['build-dir'], DEVICES, debug=conf['debug'] ) )
+        pprint( _build_chroot_command( conf['build-dir'], ["ls", "pwd"], debug=conf['debug'] ))
+        pprint( _build_copy_command( "/etc/hosts", "%s/%s" % (conf['build-dir'], "/etc/hosts"), debug=conf['debug'] ) )
+
+        pprint( _build_rm_command( "%s/%s" % (conf['build-dir'], "/etc/hosts"), debug=conf['debug'] ) )
+        pprint( _build_tar_command( "%s-%s.tgz" % ( cnt['name'], cnt['version'] ), conf['build-dir'], debug=conf['debug'] ) )
 
 sys.exit(0)
