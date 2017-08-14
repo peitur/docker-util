@@ -5,6 +5,8 @@ import os, re, sys, getopt
 import multiprocessing
 import subprocess, shlex
 import json, pathlib
+import random, string
+
 from pprint import pprint
 
 COMMANDS={
@@ -14,7 +16,7 @@ COMMANDS={
         "target":None,
         "action":"install",
         "options":["tsflags=nodocs","group_package_types=mandatory"],
-        "args":["--releasever=/", "-y"],
+        "args":["--releasever=/", "-y","--nogpgcheck"],
         "list":None
     },
     "mknod":{
@@ -101,6 +103,9 @@ DEVICES=[
 ## utils
 ## =============================================================
 
+def random_string(length):
+   return ''.join( random.choice( string.ascii_lowercase  ) for i in range(length))
+
 ## -----------------------------------------
 # dirtree: builds rec. file list
 # - path        : root path to start from
@@ -135,15 +140,17 @@ def _build_yum_command( lst, **opt ):
     y = dict( COMMANDS['yum'] )
     result = list()
 
+
     if type( lst ).__name__ == "str": lst = [ lst ]
     if 'target' in opt: y['target'] = [ "--installroot=%s" %( opt['target'] ) ]
     if 'action' in opt: y['action'] = opt['action']
     if 'config' in opt: y['config'] = opt['config']
     if 'options' in opt: y['options'] = opt['options']
     if 'args' in opt: y['args'] = opt['args']
-
-
     y['list'] = lst
+
+    if not y['target']: raise RuntimeError("No target directory specified.")
+    if not y['list']: raise RuntimeError("No packages/groups to install given.")
 
     result.append( y['cmd'] )
 
@@ -175,6 +182,8 @@ def _build_mknod_command( path, ntype='c', **opt ):
     if 'major' in opt: n['major'] = opt['major']
     if 'minor' in opt: n['minor'] = opt['minor']
 
+    if not n['path']: raise RuntimeError( "No mknod path given")
+
     result.append( n['cmd'] )
     result.append( path )
     if n['mode']:
@@ -204,8 +213,9 @@ def _build_mkdir_command( path, **opt ):
     if 'mode' in opt: n['mode'] = opt['mode']
     if 'args' in opt: n['args'] = opt['args']
 
-    result.append( n['cmd'] )
+    if not n['path']: RuntimeError( "No mkdir path given.")
 
+    result.append( n['cmd'] )
     if n['args']:
         for x in n['args']:
             result.append( x )
@@ -224,6 +234,8 @@ def _build_chroot_command( path, runlist=[], **opt ):
 
     n['path'] = re.sub( r"\/+", "/", path )
 
+    if not n['path']: RuntimeError( "No chroot path given.")
+
     result.append( "%s %s %s <<%s" % ( n['cmd'], path, n['exec'], n['name'] ) )
     result.append( runlist )
     result.append( n['name'] )
@@ -239,6 +251,9 @@ def _build_copy_command( fromfile, tofile, **opt ):
     n['to'] = re.sub( r"\/+", "/", tofile )
 
     if 'args' in opt: n['args'] = opt['args']
+
+    if not n['from']: RuntimeError( "No copy from path given.")
+    if not n['to']: RuntimeError( "No copy to path given.")
 
     result.append( n['cmd'] )
 
@@ -257,6 +272,7 @@ def _build_rm_command( path, **opt ):
 
     n['path'] = re.sub( r"\/+", "/", path )
 
+    if not n['path']: RuntimeError( "No remove path given.")
     if 'args' in opt: n['args'] = opt['args']
 
     result.append( n['cmd'] )
@@ -274,6 +290,9 @@ def _build_chmod_command( path, access, **opt ):
 
     n['path'] = re.sub( r"\/+", "/", path )
     n['access'] = access
+
+    if not n['path']: RuntimeError( "No chmod path given.")
+    if not n['access']: RuntimeError( "No chmod access given.")
 
     if 'args' in opt: n['args'] = opt['args']
 
@@ -297,6 +316,11 @@ def _build_chown_command( path, user, group, **opt ):
 
     if 'args' in opt: n['args'] = opt['args']
 
+    if not n['path']: RuntimeError( "No chown path given.")
+    if not n['user']: RuntimeError( "No chown user given.")
+    if not n['group']: RuntimeError( "No chown group given.")
+
+
     result.append( n['cmd'] )
     for x in n['args']:
         result.append( x )
@@ -316,6 +340,10 @@ def _build_tar_command( filename, path, **opt ):
     n['path'] = re.sub( r"\/+", "/", path )
     if 'args' in opt: n['args'] = opt['args']
 
+
+    if not n['file']: RuntimeError( "No tar target file given.")
+    if not n['path']: RuntimeError( "No tar source path given.")
+
     result.append( n['cmd'] )
     for x in n['args']:
         result.append( x )
@@ -327,32 +355,34 @@ def _build_tar_command( filename, path, **opt ):
 
 
 ## -----------------------------------------
-# _run_command: Run one command,
+# run_command: Run one command,
 # - cmd_list    : command and arguments as list
 # - opt         : dict of options
 #   : debug     : debug info in function
-def _run_command( cmd, **opt ):
+def run_command( cmd, **opt ):
     debug = False
     test = False
-    if 'debug' in 'opt': debug = opt['debug']
-    if 'test' in 'opt': test = opt['test']
+    if 'debug' in opt: debug = opt['debug']
+    if 'test' in opt: test = opt['test']
 
     result = list()
     if type( cmd ).__name__ == "str":
         cmd = shlex.split( cmd )
 
+    if debug: pprint( cmd )
 
-    prc = subprocess.Popen( cmd, universal_newlines=True, stdout=subprocess.PIPE )
+    prc = subprocess.Popen( cmd, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
     for line in prc.stdout.readlines():
+        print( "DEBUG: %s" % ( line.lstrip().rstrip() ) )
         result.append( line.lstrip().rstrip() )
     return result
 
 ## ----------------------------------
-# _run_command_line: Run one command, return each printed line to caller (called by "with"/"for" )
+# run_command_line: Run one command, return each printed line to caller (called by "with"/"for" )
 # - cmd_list    : command and arguments as list
 # - opt         : dict of options
 #   : debug     : debug info in function
-def _run_command_line( cmd, **opt ):
+def run_command_line( cmd, **opt ):
     debug = False
     result = None
 
@@ -437,6 +467,7 @@ if __name__ == "__main__":
     conf = dict()
     conf['debug'] = False
     conf['test'] = True
+    conf['random-string'] = random_string( 8 )
 
     conf['help'] = False
     conf['config-file'] = None
@@ -483,73 +514,93 @@ if __name__ == "__main__":
         print("EROOR Failed to parse configuration")
         print("ERROR: %s" % (e))
 
-    pprint( conf )
-    pprint( options )
+    if not os.path.exists( conf['build-dir'] ):
+        print("# -- Creating workdir %s" % ( conf['build-dir']) )
+        os.makedirs( conf['build-dir'] )
+
+    if os.environ[ "USER" ] != "root":
+        print("# EE Must be root to run this ...")
+        sys.exit(1)
 
     for cnt in options:
+        found_error = False
+        bdir = "%s_%s" % ( conf['build-dir'], conf['random-string'] )
         print("# --------------------------------------------------")
-        print("# Processing container %s-%s ..."  % ( cnt['name'], cnt['version'] ) )
+        print("# Processing container %s-%s Building in %s..."  % ( cnt['name'], cnt['version'], bdir ) )
+
+        command_list = list()
 
     # 1. create build dir
     # 2. create device nodes
     # 3. prepare yum and yum repos
     # 4. install base packages with yum target
         print("# -- Create base devices...")
-        pprint( _build_mkdir_command( "%s/%s" % (conf['build-dir'], "/dev"), mode="755", args=["-p"], debug=conf['debug'] ) )
-        pprint( _build_devices( conf['build-dir'], DEVICES, debug=conf['debug'] ) )
+        run_command( _build_mkdir_command( "%s/%s" % (bdir, "/dev"), mode="755", args=["-p"], debug=conf['debug'] ), debug=conf['debug'] )
+        for d in _build_devices( bdir, DEVICES, debug=conf['debug'] ):
+            run_command( d, debug=conf['debug'] )
+
+        print("# -- Copy GPG keys to new yum env.")
+        run_command( _build_mkdir_command( "%s/%s" % (bdir, "/etc/pki"), mode="0755", args=['-p'], debug=conf['debug'] ), debug=conf['debug'] )
+        run_command( _build_copy_command( "/etc/pki/rpm-gpg", "%s/%s" % (bdir, "/etc/pki/rpm-gpg" ), args=['-r'], debug=conf['debug'] ), debug=conf['debug'] )
+
+        if len( cnt['repo-files'] ) > 0:
+            print("# -- Copying system repo files into container...")
+            run_command( _build_mkdir_command( "%s/%s" % (bdir, "/etc/yum.repos.d"), mode="0755", args=['-p'], debug=conf['debug'] ), debug=conf['debug'] )
+            for rf in cnt['repo-files']:
+                run_command( _build_copy_command( rf , "%s/%s" % (bdir, rf ), debug=conf['debug'] ), debug=conf['debug'] )
 
         if len( cnt['base-group'] ) > 0:
             print("# -- YUM Install base group...")
-            pprint( _build_yum_command( cnt['base-group'], target=conf['build-dir'], action="groupinstall" , debug=conf['debug']) )
+            run_command( _build_yum_command( cnt['base-group'], target=bdir, action="groupinstall" , debug=conf['debug']), debug=conf['debug'] )
 
         if len( cnt['base-packages'] ) > 0:
             print("# -- YUM Install base packages...")
-            pprint( _build_yum_command( cnt['base-packages'], target=conf['build-dir'], action="install", debug=conf['debug'] ) )
+            run_command( _build_yum_command( cnt['base-packages'], target=bdir, action="install", debug=conf['debug'] ), debug=conf['debug'] )
 
         if len( cnt['install-groups'] ) > 0:
             print("# -- YUM Install requested groups...")
-            pprint( _build_yum_command( cnt['install-groups'], target=conf['build-dir'], action="groupinstall" , debug=conf['debug']) )
+            run_command( _build_yum_command( cnt['install-groups'], target=bdir, action="groupinstall" , debug=conf['debug']), debug=conf['debug'] )
 
         if len( cnt['install-packages'] ) > 0:
             print("# -- YUM Install requested packages...")
-            pprint( _build_yum_command( cnt['install-packages'], target=conf['build-dir'], action="install", debug=conf['debug'] ) )
+            run_command( _build_yum_command( cnt['install-packages'], target=bdir, action="install", debug=conf['debug'] ), debug=conf['debug'] )
 
         print("# --  YUM clean all ...")
-        pprint( _build_yum_command( ['all'], target=conf['build-dir'], options=[], args=[], action="clean" , debug=conf['debug']) )
+        run_command( _build_yum_command( ['all'], target=bdir, options=[], args=["-y"], action="clean" , debug=conf['debug']), debug=conf['debug'] )
 
 
         print("# -- Clean up unwanted files, strip to minimize...")
         for strp in cnt['strip-paths']:
-            pprint( _build_rm_command( "%s/%s" % (conf['build-dir'], strp ), args=['-rf'], debug=conf['debug'] ) )
+            print("# ---- Stripping: %s" % ( strp ) )
+            run_command( _build_rm_command( "%s/%s" % (bdir, strp ), args=['-fR'], debug=conf['debug'] ), debug=conf['debug'] )
 
         print("# --- Clenaing yum cached files ... ")
-        pprint( _build_rm_command( "%s/%s" % (conf['build-dir'], "/var/cache/yum"), args=['-rf'], debug=conf['debug'] ) )
-        pprint( _build_mkdir_command( "%s/%s" % (conf['build-dir'], "/var/cache/yum"), mode="0755", args=['-p'], debug=conf['debug'] ) )
+        run_command( _build_rm_command( "%s/%s" % (bdir, "/var/cache/yum"), args=['-fR'], debug=conf['debug'] ), debug=conf['debug'] )
+        run_command( _build_mkdir_command( "%s/%s" % (bdir, "/var/cache/yum"), mode="0755", args=['-p'], debug=conf['debug'] ), debug=conf['debug'] )
 
         print("# --- Cleaning ldconfig caches ...")
-        pprint( _build_rm_command( "%s/%s" % (conf['build-dir'], "/etc/ld.so.cache"), args=['-rf'], debug=conf['debug'] ) )
-        pprint( _build_rm_command( "%s/%s" % (conf['build-dir'], "/var/cache/ldconfig"), args=['-rf'], debug=conf['debug'] ) )
-        pprint( _build_mkdir_command( "%s/%s" % (conf['build-dir'], "/var/cache/ldconfig"), mode="0755", args=['-p'], debug=conf['debug'] ) )
+        run_command( _build_rm_command( "%s/%s" % (bdir, "/etc/ld.so.cache"), args=['-fR'], debug=conf['debug'] ), debug=conf['debug'] )
+        run_command( _build_rm_command( "%s/%s" % (bdir, "/var/cache/ldconfig"), args=['-fR'], debug=conf['debug'] ), debug=conf['debug'] )
+        run_command( _build_mkdir_command( "%s/%s" % (bdir, "/var/cache/ldconfig"), mode="0755", args=['-p'], debug=conf['debug'] ), debug=conf['debug'] )
 
 
         print("# -- Enable networking...")
-        _write_text_file( "%s/%s" % ( conf['build-dir'], "/etc/sysconfig/network"), [ "NETWORKING=yes","HOSTNAME=localhost.localdomain" ] )
+        _write_text_file( "%s/%s" % ( bdir, "/etc/sysconfig/network"), [ "NETWORKING=yes","HOSTNAME=localhost.localdomain" ] )
 
         print("# -- Copying system files into container...")
-        pprint( _build_copy_command( "/etc/hosts", "%s/%s" % (conf['build-dir'], "/etc/hosts"), debug=conf['debug'] ) )
-
-        if len( cnt['repo-files'] ) > 0:
-            print("# -- Copying system repo files into container...")
-            for rf in cnt['repo-files']:
-                pprint( _build_copy_command( rf , "%s/%s" % (conf['build-dir'], rf ), debug=conf['debug'] ) )
+        run_command( _build_copy_command( "/etc/hosts", "%s/%s" % (bdir, "/etc/hosts"), debug=conf['debug'] ), debug=conf['debug'] )
 
 
         if len( cnt['post-script'] ) > 0:
             for scr in cnt['post-script']:
                 print("# -- Clean up unwanted files, strip to minimize...")
-                pprint( _build_chroot_command( conf['build-dir'], ["ls", "pwd"], debug=conf['debug'] ))
+                # run_command( _build_chroot_command( bdir, ["ls", "pwd"], debug=conf['debug'] ))
 
         print("# -- Build resulting contained image file...")
-        pprint( _build_tar_command( "%s-%s.tgz" % ( cnt['name'], cnt['version'] ), conf['build-dir'], args=['--numeric-owner','--directory=%s'%(conf['build-dir']),'-cf'], debug=conf['debug'] ) )
+        run_command( _build_tar_command( "%s-%s.tgz" % ( cnt['name'], cnt['version'] ), bdir, args=['--numeric-owner','--directory=%s'%(bdir),'-cf'], debug=conf['debug'] ), debug=conf['debug'] )
+
+        if not found_error and not conf['debug']:
+            print("# -- Clenaing up build dir %s..." % ( bdir ) )
+            run_command( _build_rm_command( bdir, args=['-fR'], debug=conf['debug'] ), debug=conf['debug'] )
 
 sys.exit(0)
