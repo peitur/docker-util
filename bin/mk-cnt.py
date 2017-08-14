@@ -545,8 +545,9 @@ if __name__ == "__main__":
 
 
         if len( cnt['post-script'] ) > 0:
-            print("# -- Clean up unwanted files, strip to minimize...")
-            pprint( _build_chroot_command( conf['build-dir'], ["ls", "pwd"], debug=conf['debug'] ))
+            for scr in cnt['post-script']:
+                print("# -- Clean up unwanted files, strip to minimize...")
+                pprint( _build_chroot_command( conf['build-dir'], ["ls", "pwd"], debug=conf['debug'] ))
 
         print("# -- Build resulting contained image file...")
         pprint( _build_tar_command( "%s-%s.tgz" % ( cnt['name'], cnt['version'] ), conf['build-dir'], args=['--numeric-owner','--directory=%s'%(conf['build-dir']),'-cf'], debug=conf['debug'] ) )
