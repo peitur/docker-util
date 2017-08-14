@@ -373,7 +373,7 @@ def run_command( cmd, **opt ):
 
     prc = subprocess.Popen( cmd, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
     for line in prc.stdout.readlines():
-        print( "DEBUG: %s" % ( line.lstrip().rstrip() ) )
+        print( ">> %s" % ( line.lstrip().rstrip() ) )
         result.append( line.lstrip().rstrip() )
     return result
 
@@ -449,9 +449,9 @@ def _write_text_file( filename, data, **options ):
         data = "\n".join( data )
 
     pprint( [ "%s" % (filename) , data ] )
-#    fd = open( filename, "w" )
-#    fd.write( data )
-#    fd.close()
+    fd = open( filename, "w" )
+    fd.write( data )
+    fd.close()
 
 def _write_json_file( filename, data, **options  ):
     pass
@@ -543,12 +543,6 @@ if __name__ == "__main__":
         run_command( _build_mkdir_command( "%s/%s" % (bdir, "/etc/pki"), mode="0755", args=['-p'], debug=conf['debug'] ), debug=conf['debug'] )
         run_command( _build_copy_command( "/etc/pki/rpm-gpg", "%s/%s" % (bdir, "/etc/pki/rpm-gpg" ), args=['-r'], debug=conf['debug'] ), debug=conf['debug'] )
 
-        if len( cnt['repo-files'] ) > 0:
-            print("# -- Copying system repo files into container...")
-            run_command( _build_mkdir_command( "%s/%s" % (bdir, "/etc/yum.repos.d"), mode="0755", args=['-p'], debug=conf['debug'] ), debug=conf['debug'] )
-            for rf in cnt['repo-files']:
-                run_command( _build_copy_command( rf , "%s/%s" % (bdir, rf ), debug=conf['debug'] ), debug=conf['debug'] )
-
         if len( cnt['base-group'] ) > 0:
             print("# -- YUM Install base group...")
             run_command( _build_yum_command( cnt['base-group'], target=bdir, action="groupinstall" , debug=conf['debug']), debug=conf['debug'] )
@@ -556,6 +550,13 @@ if __name__ == "__main__":
         if len( cnt['base-packages'] ) > 0:
             print("# -- YUM Install base packages...")
             run_command( _build_yum_command( cnt['base-packages'], target=bdir, action="install", debug=conf['debug'] ), debug=conf['debug'] )
+
+        if len( cnt['repo-files'] ) > 0:
+            print("# -- Copying system repo files into container...")
+            run_command( _build_rm_command( "%s/%s" % (bdir, "/etc/yum.repos.d" ), args=['-fR'], debug=conf['debug'] ), debug=conf['debug'] )
+            run_command( _build_mkdir_command( "%s/%s" % (bdir, "/etc/yum.repos.d"), mode="0755", args=['-p'], debug=conf['debug'] ), debug=conf['debug'] )
+            for rf in cnt['repo-files']:
+                run_command( _build_copy_command( rf , "%s/%s" % (bdir, rf ), debug=conf['debug'] ), debug=conf['debug'] )
 
         if len( cnt['install-groups'] ) > 0:
             print("# -- YUM Install requested groups...")
