@@ -370,11 +370,11 @@ def run_command( cmd, **opt ):
     if type( cmd ).__name__ == "str":
         cmd = shlex.split( cmd )
 
-    if debug: pprint( cmd )
+    if debug: print( "CMD:>> [ %s ]" % ( " ".join( cmd ) ) )
 
     prc = subprocess.Popen( cmd, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
     for line in prc.stdout.readlines():
-        print( ">> %s" % ( line.lstrip().rstrip() ) )
+        if debug: print( "DEBUG:>> %s" % ( line.lstrip().rstrip() ) )
         result.append( line.lstrip().rstrip() )
     return result
 
@@ -449,7 +449,8 @@ def _write_text_file( filename, data, **options ):
     if type( data ).__name__ == "list":
         data = "\n".join( data )
 
-    pprint( [ "%s" % (filename) , data ] )
+    print( " ".join( [ "%s" % (filename) , data ] ) )
+
     fd = open( filename, "w" )
     fd.write( data )
     fd.close()
