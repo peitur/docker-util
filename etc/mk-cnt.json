@@ -25,6 +25,6 @@
     "install-groups":[],
     "install-packages":[],
     "remove-packages":[],
-    "post-script":["test.sh"]
+    "post-script":["../test/mk-cnt-test.sh"]
   }
 ]
