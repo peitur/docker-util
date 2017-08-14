@@ -460,7 +460,16 @@ def _write_json_file( filename, data, **options  ):
 
 def print_help( **opt ):
     print("# Help: %s" % ( opt['script'] ) )
-    pprint( opt )
+
+    print("\t%-15s %13s %-26s" % ( "-h|--help", ":", "This help" ))
+    print("\t%-15s %13s %-26s" % ( "-d|--debug", ":", "Print Debug information" ))
+    print("\t%-15s %13s %-26s" % ( "   --no-clean", ":", "Do not clean build dir when completed" ))
+    print("\t%-15s %10s %-26s" % ( "-c|--config <file>", ":", "Configuration file, json format" ))
+    print("\t%-15s %8s %-26s" % ( "-b|--build-dir <dir>", ":", "Build root dir" ))
+    print("\t%-15s %11s %-26s" % ( "-t|--target <trg>", ":", "Target (tgz) file to output image to" ))
+    print("\t%-15s %12s %-26s" % ( "-v|--version <v>", ":", "Image version" ))
+    print("\t%-15s %12s %-26s" % ( "-T|--tags <tags>", ":", "Tag list to use (comma sepparated)" ))
+
 
 
 if __name__ == "__main__":
@@ -468,6 +477,7 @@ if __name__ == "__main__":
     conf = dict()
     conf['debug'] = False
     conf['test'] = True
+    conf['clean'] = True
     conf['random-string'] = random_string( 8 )
 
     conf['help'] = False
@@ -482,7 +492,7 @@ if __name__ == "__main__":
     options = dict()
 
     try:
-        opts, args = getopt.getopt(sys.argv, "hdc:d:b:v:T:", ["help", "debug","config=","target-file=","build-dir=","version=","tags="])
+        opts, args = getopt.getopt(sys.argv, "hdc:d:b:v:T:", ["no-clean","help", "debug","config=","target-file=","build-dir=","version=","tags="])
     except getopt.GetoptError as err:
         print(err) # will print something like "option -a not recognized"
         print_help( **options )
@@ -496,6 +506,7 @@ if __name__ == "__main__":
         elif o in ("-t", "--target-file"): conf['target-file'] = a
         elif o in ("-v", "--version"): conf['version'] = a
         elif o in ("-T", "--tags"): conf['tags'] = a
+        elif o in ( "--no-clean"): conf['clean'] = False
 
     if conf['tags']:
         conf['tags'] = re.split(",", conf['tags'] )
@@ -508,6 +519,10 @@ if __name__ == "__main__":
     except Exception as e:
         print( "ERROR: %s" % (e) )
         sys.exit(1)
+
+    if conf['help']:
+        print_help( **conf )
+        sys.exit(0)
 
     try:
         options = _read_json_file( conf['config-file'] )
@@ -613,15 +628,18 @@ if __name__ == "__main__":
                 run_command( _build_chroot_command( bdir, scr_fname, debug=conf['debug'] ))
 
         print("# -- Build resulting contained image file...")
-        img_file = "%s-%s.tgz" % ( cnt['name'], cnt['version'] )
-        run_command( _build_tar_command( img_file, ".", args=['--numeric-owner','-C',bdir ,'-czf'], debug=conf['debug'] ), debug=conf['debug'] )
 
-        if not found_error and not conf['debug']:
+        if not conf['target-file']:
+            conf['target-file'] = "%s-%s.tgz" % ( cnt['name'], cnt['version'] )
+
+        run_command( _build_tar_command( conf['target-file'], ".", args=['--numeric-owner','-C',bdir ,'-czf'], debug=conf['debug'] ), debug=conf['debug'] )
+
+        if conf['clean'] and not found_error and not conf['debug']:
             print("# -- Clenaing up build dir %s..." % ( bdir ) )
             run_command( _build_rm_command( bdir, args=['-fR'], debug=conf['debug'] ), debug=conf['debug'] )
 
         print( "# -- ---------------------------------------------------------------------------")
-        print( "# -- Test:  cat %s | docker import - %s:%s" % ( img_file, cnt['name'], cnt['version']) )
+        print( "# -- Test:  cat %s | docker import - %s:%s" % ( conf['target-file'], cnt['name'], cnt['version']) )
         print( "# -- Build: docker build .")
         print( "# -- Run:   docker run -i -t --rm %s:%s /bin/bash" % ( cnt['name'], cnt['version']) )
         print( "# -- ---------------------------------------------------------------------------")
