@@ -523,6 +523,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     for cnt in options:
+
+        if 'debug' in cnt:
+            conf['debug'] = cnt['debug']
+
         found_error = False
         bdir = "%s_%s" % ( conf['build-dir'], conf['random-string'] )
         print("# --------------------------------------------------")
@@ -598,7 +602,7 @@ if __name__ == "__main__":
                 # run_command( _build_chroot_command( bdir, ["ls", "pwd"], debug=conf['debug'] ))
 
         print("# -- Build resulting contained image file...")
-        run_command( _build_tar_command( "%s-%s.tgz" % ( cnt['name'], cnt['version'] ), bdir, args=['--numeric-owner','--directory=%s'%(bdir),'-cf'], debug=conf['debug'] ), debug=conf['debug'] )
+        run_command( _build_tar_command( "%s-%s.tgz" % ( cnt['name'], cnt['version'] ), ".", args=['--numeric-owner','-C',bdir ,'-czf'], debug=conf['debug'] ), debug=conf['debug'] )
 
         if not found_error and not conf['debug']:
             print("# -- Clenaing up build dir %s..." % ( bdir ) )
