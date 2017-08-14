@@ -44,6 +44,19 @@ COMMANDS={
         "from":None,
         "to":None
     },
+    "chmod":{
+        "cmd":"chmod",
+        "path":None,
+        "access":None,
+        "args":[]
+    },
+    "chown":{
+        "cmd":"chown",
+        "path":None,
+        "user":None,
+        "group":None,
+        "args":[]
+    },
     "rm":{
         "cmd":"rm",
         "args":[],
@@ -253,6 +266,46 @@ def _build_rm_command( path, **opt ):
     result.append( n['path'] )
 
     return result
+
+
+def _build_chmod_command( path, access, **opt ):
+    n = dict( COMMANDS['chmod'] )
+    result = list()
+
+    n['path'] = re.sub( r"\/+", "/", path )
+    n['access'] = access
+
+    if 'args' in opt: n['args'] = opt['args']
+
+    result.append( n['cmd'] )
+    for x in n['args']:
+        result.append( x )
+
+    result.append( n['access'] )
+    result.append( n['path'] )
+
+    return result
+
+
+def _build_chown_command( path, user, group, **opt ):
+    n = dict( COMMANDS['chown'] )
+    result = list()
+
+    n['path'] = re.sub( r"\/+", "/", path )
+    n['user'] = user
+    n['group'] = group
+
+    if 'args' in opt: n['args'] = opt['args']
+
+    result.append( n['cmd'] )
+    for x in n['args']:
+        result.append( x )
+
+    result.append( "%s:%s" %( n['user'], n['group'] ) )
+    result.append( n['path'] )
+
+    return result
+
 
 
 def _build_tar_command( filename, path, **opt ):
@@ -471,12 +524,12 @@ if __name__ == "__main__":
 
         print("# --- Clenaing yum cached files ... ")
         pprint( _build_rm_command( "%s/%s" % (conf['build-dir'], "/var/cache/yum"), args=['-rf'], debug=conf['debug'] ) )
-        pprint( _build_mkdir_command( "%s/%s" % (conf['build-dir'], "/var/cache/yum"), mode="0755", args=['p'], debug=conf['debug'] ) )
+        pprint( _build_mkdir_command( "%s/%s" % (conf['build-dir'], "/var/cache/yum"), mode="0755", args=['-p'], debug=conf['debug'] ) )
 
         print("# --- Cleaning ldconfig caches ...")
         pprint( _build_rm_command( "%s/%s" % (conf['build-dir'], "/etc/ld.so.cache"), args=['-rf'], debug=conf['debug'] ) )
         pprint( _build_rm_command( "%s/%s" % (conf['build-dir'], "/var/cache/ldconfig"), args=['-rf'], debug=conf['debug'] ) )
-        pprint( _build_mkdir_command( "%s/%s" % (conf['build-dir'], "/var/cache/ldconfig"), mode="0755", args=['p'], debug=conf['debug'] ) )
+        pprint( _build_mkdir_command( "%s/%s" % (conf['build-dir'], "/var/cache/ldconfig"), mode="0755", args=['-p'], debug=conf['debug'] ) )
 
 
         print("# -- Enable networking...")
