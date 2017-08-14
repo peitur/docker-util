@@ -4,9 +4,9 @@
     "version":"latest",
     "author":"",
     "tag":"test123",
-    "base-group":"base",
-    "base-packages":["bash","yum","yum-utils"],
-    "repo-files":["/etc/yum.repos.d/local-file.repo"],
+    "base-group":"",
+    "base-packages":["filesystem","basesystem","net-tools","yum","yum-utils"],
+    "repo-files":["/vagrant/share/yum.repos.d/7.0/local-file-11.repo"],
     "strip-paths":[
       "/usr/lib/locale",
       "/usr/share/locale",
@@ -23,7 +23,7 @@
       "/sbin/sln"
     ],
     "install-groups":[],
-    "install-packages":[],
+    "install-packages":["bash","gcc","python34","python34-devel"],
     "remove-packages":[],
     "post-script":["../test/mk-cnt-test.sh"]
   }

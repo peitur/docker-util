@@ -16,7 +16,7 @@ COMMANDS={
         "target":None,
         "action":"install",
         "options":["tsflags=nodocs","group_package_types=mandatory"],
-        "args":["--releasever=/", "-y","--nogpgcheck"],
+        "args":["--releasever=/", "-y","--nogpgcheck","--disableplugin=fastestmirror"],
         "list":None
     },
     "mknod":{
@@ -162,8 +162,9 @@ def _build_yum_command( lst, **opt ):
     for x in y['options']:
         result.append( "--setopt=%s" % ( x ) )
 
-    result.append( y['action'] )
     for x in y['args']: result.append( x )
+
+    result.append( y['action'] )
     for x in y['list']: result.append( x )
 
     return result
@@ -547,9 +548,14 @@ if __name__ == "__main__":
         run_command( _build_mkdir_command( "%s/%s" % (bdir, "/etc/pki"), mode="0755", args=['-p'], debug=conf['debug'] ), debug=conf['debug'] )
         run_command( _build_copy_command( "/etc/pki/rpm-gpg", "%s/%s" % (bdir, "/etc/pki/rpm-gpg" ), args=['-r'], debug=conf['debug'] ), debug=conf['debug'] )
 
+        print("# --  YUM clean all ...")
+        run_command( _build_yum_command( ['all'], target=bdir, options=[], args=["-y"], action="clean" , debug=conf['debug']), debug=conf['debug'] )
+
         if len( cnt['base-group'] ) > 0:
             print("# -- YUM Install base group...")
             run_command( _build_yum_command( cnt['base-group'], target=bdir, action="groupinstall" , debug=conf['debug']), debug=conf['debug'] )
+
+        run_command( ["yum","-c","/etc/yum.conf",'--releasever=/',"--installroot=%s" % (bdir),"repolist"] )
 
         if len( cnt['base-packages'] ) > 0:
             print("# -- YUM Install base packages...")
@@ -560,7 +566,9 @@ if __name__ == "__main__":
             run_command( _build_rm_command( "%s/%s" % (bdir, "/etc/yum.repos.d" ), args=['-fR'], debug=conf['debug'] ), debug=conf['debug'] )
             run_command( _build_mkdir_command( "%s/%s" % (bdir, "/etc/yum.repos.d"), mode="0755", args=['-p'], debug=conf['debug'] ), debug=conf['debug'] )
             for rf in cnt['repo-files']:
-                run_command( _build_copy_command( rf , "%s/%s" % (bdir, rf ), debug=conf['debug'] ), debug=conf['debug'] )
+                trg_file = re.split( r"\/", rf )[-1]
+                run_command( _build_copy_command( rf , "%s/etc/yum.repos.d/%s" % (bdir, trg_file ), debug=conf['debug'] ), debug=conf['debug'] )
+
 
         if len( cnt['install-groups'] ) > 0:
             print("# -- YUM Install requested groups...")
@@ -589,12 +597,12 @@ if __name__ == "__main__":
         run_command( _build_mkdir_command( "%s/%s" % (bdir, "/var/cache/ldconfig"), mode="0755", args=['-p'], debug=conf['debug'] ), debug=conf['debug'] )
 
 
-        print("# -- Enable networking...")
-        _write_text_file( "%s/%s" % ( bdir, "/etc/sysconfig/network"), [ "NETWORKING=yes","HOSTNAME=localhost.localdomain" ] )
 
         print("# -- Copying system files into container...")
         run_command( _build_copy_command( "/etc/hosts", "%s/%s" % (bdir, "/etc/hosts"), debug=conf['debug'] ), debug=conf['debug'] )
 
+        print("# -- Enable networking...")
+        _write_text_file( "%s/%s" % ( bdir, "/etc/sysconfig/network"), [ "NETWORKING=yes","HOSTNAME=localhost.localdomain" ] )
 
         if len( cnt['post-script'] ) > 0:
             for x, scr in enumerate( cnt['post-script'] ):
@@ -605,10 +613,16 @@ if __name__ == "__main__":
                 run_command( _build_chroot_command( bdir, scr_fname, debug=conf['debug'] ))
 
         print("# -- Build resulting contained image file...")
-        run_command( _build_tar_command( "%s-%s.tgz" % ( cnt['name'], cnt['version'] ), ".", args=['--numeric-owner','-C',bdir ,'-czf'], debug=conf['debug'] ), debug=conf['debug'] )
+        img_file = "%s-%s.tgz" % ( cnt['name'], cnt['version'] )
+        run_command( _build_tar_command( img_file, ".", args=['--numeric-owner','-C',bdir ,'-czf'], debug=conf['debug'] ), debug=conf['debug'] )
 
         if not found_error and not conf['debug']:
             print("# -- Clenaing up build dir %s..." % ( bdir ) )
             run_command( _build_rm_command( bdir, args=['-fR'], debug=conf['debug'] ), debug=conf['debug'] )
+
+        print( "# -- ---------------------------------------------------------------------------")
+        print( "# -- Test: cat %s | docker import - %s:%s" % ( img_file, cnt['name'], cnt['version']) )
+        print( "# -- Run: docker run -i -t --rm %s:%s /bin/bash" % ( cnt['name'], cnt['version']) )
+        print( "# -- ---------------------------------------------------------------------------")
 
 sys.exit(0)
