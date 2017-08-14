@@ -3,5 +3,6 @@ echo "----------------------------------"
 echo "Doing the deed..."
 pwd
 uname -a
-yum install -y screen
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+yum install -y erlang
 echo "----------------------------------"

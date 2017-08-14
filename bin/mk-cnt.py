@@ -547,7 +547,9 @@ if __name__ == "__main__":
         found_error = False
         bdir = "%s_%s" % ( conf['build-dir'], conf['random-string'] )
         print("# --------------------------------------------------")
+        print("# Using configuration file: %s" % ( conf['config-file'] ) )
         print("# Processing container %s-%s Building in %s..."  % ( cnt['name'], cnt['version'], bdir ) )
+        print("# --------------------------------------------------")
 
         command_list = list()
 
