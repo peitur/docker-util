@@ -36,9 +36,7 @@ COMMANDS={
     "chroot":{
         "cmd":"chroot",
         "path":None,
-        "exec":"/bin/bash",
-        "name":"EOF",
-        "run":[]
+        "exec":None
     },
     "copy":{
         "cmd":"cp",
@@ -228,17 +226,19 @@ def _build_mkdir_command( path, **opt ):
 
     return result
 
-def _build_chroot_command( path, runlist=[], **opt ):
+def _build_chroot_command( path, run_script, **opt ):
     n = dict( COMMANDS['chroot'] )
     result = list()
 
     n['path'] = re.sub( r"\/+", "/", path )
+    n['exec'] = re.sub( r"\/+", "/", run_script )
 
     if not n['path']: RuntimeError( "No chroot path given.")
+    if not n['exec']: RuntimeError( "No chroot exec path given.")
 
-    result.append( "%s %s %s <<%s" % ( n['cmd'], path, n['exec'], n['name'] ) )
-    result.append( runlist )
-    result.append( n['name'] )
+    result.append( n['cmd'] )
+    result.append( n['path'] )
+    result.append( "./%s" % ( n['exec'] ) )
 
     return result
 
@@ -597,9 +597,12 @@ if __name__ == "__main__":
 
 
         if len( cnt['post-script'] ) > 0:
-            for scr in cnt['post-script']:
-                print("# -- Clean up unwanted files, strip to minimize...")
-                # run_command( _build_chroot_command( bdir, ["ls", "pwd"], debug=conf['debug'] ))
+            for x, scr in enumerate( cnt['post-script'] ):
+                scr_fname = "%s_%s.sh" %( x, random_string( 12 ) )
+                print("# -- Running post install script %s..." % ( "%s/%s" % ( bdir, scr_fname ) ) )
+                run_command( _build_copy_command( scr, "%s/%s" % ( bdir, scr_fname ), debug=conf['debug'] ), debug=conf['debug'] )
+                run_command( _build_chmod_command( "%s/%s" % ( bdir, scr_fname ), "777", debug=conf['debug'] ), debug=conf['debug'] )
+                run_command( _build_chroot_command( bdir, scr_fname, debug=conf['debug'] ))
 
         print("# -- Build resulting contained image file...")
         run_command( _build_tar_command( "%s-%s.tgz" % ( cnt['name'], cnt['version'] ), ".", args=['--numeric-owner','-C',bdir ,'-czf'], debug=conf['debug'] ), debug=conf['debug'] )

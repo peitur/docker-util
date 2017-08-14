@@ -5,7 +5,7 @@
     "author":"",
     "tag":"test123",
     "base-group":"base",
-    "base-packages":["yum","yum-utils"],
+    "base-packages":["bash","yum","yum-utils"],
     "repo-files":["/etc/yum.repos.d/local-file.repo"],
     "strip-paths":[
       "/usr/lib/locale",
@@ -25,6 +25,6 @@
     "install-groups":[],
     "install-packages":[],
     "remove-packages":[],
-    "post-script":[]
+    "post-script":["test.sh"]
   }
 ]
