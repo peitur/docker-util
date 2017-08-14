@@ -485,6 +485,12 @@ if __name__ == "__main__":
         print("# -- Copying system files into container...")
         pprint( _build_copy_command( "/etc/hosts", "%s/%s" % (conf['build-dir'], "/etc/hosts"), debug=conf['debug'] ) )
 
+        if len( cnt['repo-files'] ) > 0:
+            print("# -- Copying system repo files into container...")
+            for rf in cnt['repo-files']:
+                pprint( _build_copy_command( rf , "%s/%s" % (conf['build-dir'], rf ), debug=conf['debug'] ) )
+
+
         if len( cnt['post-script'] ) > 0:
             print("# -- Clean up unwanted files, strip to minimize...")
             pprint( _build_chroot_command( conf['build-dir'], ["ls", "pwd"], debug=conf['debug'] ))

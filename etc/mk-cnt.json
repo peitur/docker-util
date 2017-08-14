@@ -6,6 +6,7 @@
     "tag":"test123",
     "base-group":"base",
     "base-packages":["yum","yum-utils"],
+    "repo-files":["/etc/yum.repos.d/local-file.repo"],
     "strip-paths":[
       "/usr/lib/locale",
       "/usr/share/locale",
