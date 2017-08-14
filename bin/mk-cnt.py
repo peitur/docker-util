@@ -531,9 +531,6 @@ if __name__ == "__main__":
         print("EROOR Failed to parse configuration")
         print("ERROR: %s" % (e))
 
-    if not os.path.exists( conf['build-dir'] ):
-        print("# -- Creating workdir %s" % ( conf['build-dir']) )
-        os.makedirs( conf['build-dir'] )
 
     if os.environ[ "USER" ] != "root":
         print("# EE Must be root to run this ...")
@@ -546,10 +543,15 @@ if __name__ == "__main__":
 
         found_error = False
         bdir = "%s_%s" % ( conf['build-dir'], conf['random-string'] )
-        print("# --------------------------------------------------")
-        print("# Using configuration file: %s" % ( conf['config-file'] ) )
-        print("# Processing container %s-%s Building in %s..."  % ( cnt['name'], cnt['version'], bdir ) )
-        print("# --------------------------------------------------")
+
+        if not os.path.exists( bdir ):
+            print("# -- Creating workdir %s" % ( bdir ) )
+            os.makedirs( bdir )
+
+        print("# -- ------------------------------------------------")
+        print("# -- Using configuration file: %s" % ( conf['config-file'] ) )
+        print("# -- Processing container %s-%s Building in %s..."  % ( cnt['name'], cnt['version'], bdir ) )
+        print("# -- ------------------------------------------------")
 
         command_list = list()
 
