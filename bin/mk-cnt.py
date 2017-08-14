@@ -621,8 +621,9 @@ if __name__ == "__main__":
             run_command( _build_rm_command( bdir, args=['-fR'], debug=conf['debug'] ), debug=conf['debug'] )
 
         print( "# -- ---------------------------------------------------------------------------")
-        print( "# -- Test: cat %s | docker import - %s:%s" % ( img_file, cnt['name'], cnt['version']) )
-        print( "# -- Run: docker run -i -t --rm %s:%s /bin/bash" % ( cnt['name'], cnt['version']) )
+        print( "# -- Test:  cat %s | docker import - %s:%s" % ( img_file, cnt['name'], cnt['version']) )
+        print( "# -- Build: docker build .")
+        print( "# -- Run:   docker run -i -t --rm %s:%s /bin/bash" % ( cnt['name'], cnt['version']) )
         print( "# -- ---------------------------------------------------------------------------")
 
 sys.exit(0)
