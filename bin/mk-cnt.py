@@ -598,6 +598,11 @@ if __name__ == "__main__":
             print("# -- YUM Install requested packages...")
             run_command( _build_yum_command( cnt['install-packages'], target=bdir, action="install", debug=conf['debug'] ), debug=conf['debug'] )
 
+        if len( cnt['remove-packages'] ) > 0:
+            print("# -- YUM Removing requested packages...")
+            run_command( _build_yum_command( cnt['remove-packages'], target=bdir, action="remove", debug=conf['debug'] ), debug=conf['debug'] )
+
+
         print("# -- YUM clean all ...")
         run_command( _build_yum_command( ['all'], target=bdir, options=[], args=["-y"], action="clean" , debug=conf['debug']), debug=conf['debug'] )
 

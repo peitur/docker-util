@@ -23,8 +23,8 @@
       "/sbin/sln"
     ],
     "install-groups":[],
-    "install-packages":["bash","gcc","python34","python34-devel"],
-    "remove-packages":[],
-    "post-script":["../test/mk-cnt-test.sh"]
+    "install-packages":["bash","python34"],
+    "remove-packages":["grub2","kernel"],
+    "post-script":["test/mk-cnt-test.sh"]
   }
 ]
