@@ -239,7 +239,10 @@ def _build_chroot_command( path, run_script, **opt ):
 
     result.append( n['cmd'] )
     result.append( n['path'] )
-    result.append( "./%s" % ( n['exec'] ) )
+    result.append( "/bin/bash" )
+    result.append( n['exec'] )
+
+    pprint( result )
 
     return result
 
@@ -467,7 +470,7 @@ def print_help( **opt ):
     print("\t%-15s %13s %-26s" % ( "   --no-clean", ":", "Do not clean build dir when completed" ))
     print("\t%-15s %10s %-26s" % ( "-c|--config <file>", ":", "Configuration file, json format" ))
     print("\t%-15s %8s %-26s" % ( "-b|--build-dir <dir>", ":", "Build root dir" ))
-    print("\t%-15s %11s %-26s" % ( "-t|--target <trg>", ":", "Target (tgz) file to output image to" ))
+    print("\t%-15s %11s %-26s" % ( "-t|--target-file <trg>", ":", "Target (tgz) file to output image to" ))
     print("\t%-15s %12s %-26s" % ( "-v|--version <v>", ":", "Image version" ))
     print("\t%-15s %12s %-26s" % ( "-T|--tags <tags>", ":", "Tag list to use (comma sepparated)" ))
 
@@ -493,7 +496,7 @@ if __name__ == "__main__":
     options = dict()
 
     try:
-        opts, args = getopt.getopt(sys.argv, "hdc:d:b:v:T:", ["no-clean","help", "debug","config=","target-file=","build-dir=","version=","tags="])
+        opts, args = getopt.getopt(sys.argv, "hdc:d:b:t:v:T:", ["no-clean","help", "debug","config=","target-file=","build-dir=","version=","tags="])
     except getopt.GetoptError as err:
         print(err) # will print something like "option -a not recognized"
         print_help( **options )
@@ -511,6 +514,10 @@ if __name__ == "__main__":
 
     if conf['tags']:
         conf['tags'] = re.split(",", conf['tags'] )
+
+    if conf['help']:
+        print_help( **conf )
+        sys.exit(0)
 
     try:
         if not conf['config-file']: raise RuntimeError("Missing configuration file!")
@@ -628,6 +635,9 @@ if __name__ == "__main__":
 
         print("# -- Enable networking...")
         _write_text_file( "%s/%s" % ( bdir, "/etc/sysconfig/network"), [ "NETWORKING=yes","HOSTNAME=localhost.localdomain" ] )
+
+        print("# -- Copy resolv.conf ...")
+        run_command( _build_copy_command( "/etc/resolv.conf", "%s/%s" % (bdir, "/etc/resolv.conf"), debug=conf['debug'] ), debug=conf['debug'] )
 
         if len( cnt['post-script'] ) > 0:
             for x, scr in enumerate( cnt['post-script'] ):
