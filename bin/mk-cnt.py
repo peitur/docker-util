@@ -82,7 +82,7 @@ COMMANDS={
 # mknod -m 666 "$target"/dev/urandom c 1 9
 # mknod -m 666 "$target"/dev/zero c 1 5
 
-DEVICES=[
+WANTED_DEVICES=[
 #     { 'file': "", 'mode':"", 'type':"", "major":"", "minor":"" }
     { 'file': "/dev/console", 'mode':"600", 'type':"c", "major":"5", "minor":"1" },
     { 'file': "/dev/initctl", 'mode':"666", 'type':"p", 'major':None, 'minor': None },
@@ -379,7 +379,38 @@ def run_command( cmd, **opt ):
     for line in prc.stdout.readlines():
         if debug: print( "DEBUG:>> %s" % ( line.lstrip().rstrip() ) )
         result.append( line.lstrip().rstrip() )
+
+        if prc.poll():
+            break
+
     return result
+
+
+## -----------------------------------------
+# run_command_iter: Run one command ang get output as iterator,
+# - cmd_list    : command and arguments as list
+# - opt         : dict of options
+#   : debug     : debug info in function
+def run_command_iter( cmd, **opt ):
+    debug = False
+    test = False
+    if 'debug' in opt: debug = opt['debug']
+    if 'test' in opt: test = opt['test']
+
+    result = list()
+    if type( cmd ).__name__ == "str":
+        cmd = shlex.split( cmd )
+
+    if debug: print( "CMD:>> [ %s ]" % ( " ".join( cmd ) ) )
+
+    prc = subprocess.Popen( cmd, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
+    for line in prc.stdout.readlines():
+        if debug: print( "DEBUG:>> %s" % ( line.lstrip().rstrip() ) )
+        yield line.rstrip()
+
+        if prc.poll():
+            break
+
 
 ## ----------------------------------
 # run_command_line: Run one command, return each printed line to caller (called by "with"/"for" )
@@ -568,7 +599,7 @@ if __name__ == "__main__":
     # 4. install base packages with yum target
         print("# -- Create base devices...")
         run_command( _build_mkdir_command( "%s/%s" % (bdir, "/dev"), mode="755", args=["-p"], debug=conf['debug'] ), debug=conf['debug'] )
-        for d in _build_devices( bdir, DEVICES, debug=conf['debug'] ):
+        for d in _build_devices( bdir, WANTED_DEVICES, debug=conf['debug'] ):
             run_command( d, debug=conf['debug'] )
 
         print("# -- Copy GPG keys to new yum env.")
